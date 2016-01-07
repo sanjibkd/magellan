@@ -1,6 +1,6 @@
 import pandas as pd
 
-from core.catalog_manager import CatalogManager
+from magellan.core import CatalogManager
 
 cat = CatalogManager()
 A = pd.read_csv('datasets/table_A.csv')
