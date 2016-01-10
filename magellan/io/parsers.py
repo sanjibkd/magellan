@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 def read_csv(filepath, **kwargs):
     if is_metadata_file_present(filepath) == True:
-        metadata, numlines = get_metadata_from_file(filepath)
+        filename, fileextension = os.path.splitext(filepath)
+        filename = filename +'.metadata'
+        metadata, numlines = get_metadata_from_file(filename)
     else:
         metadata = {}
     metadata, kwargs = update_metadata(metadata, **kwargs)
@@ -20,7 +22,7 @@ def read_csv(filepath, **kwargs):
     key = metadata.pop('key', None)
     if key is not None:
         catalog.set_key(df, key)
-    for k, v in metadata.itertimes():
+    for k, v in metadata.iteritems():
         catalog.set_metadata(df, k, v)
     return df
 
@@ -36,7 +38,7 @@ def to_csv(df, filepath, **kwargs):
     metadata_filename = filename +'.metadata'
 
     # write metadata
-    write_metadata(metadata_filename)
+    write_metadata(df, metadata_filename)
 
     # write dataftame
     df.to_csv(filepath, **kwargs)
