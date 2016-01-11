@@ -11,3 +11,9 @@ from magellan.core.catalog import get_key, set_key
 # io related methods
 
 from magellan.io.parsers import read_csv, to_csv
+
+
+
+# logger
+import logging
+logging.basicConfig(level=logging.INFO)

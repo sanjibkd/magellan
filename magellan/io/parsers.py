@@ -6,7 +6,6 @@ from collections import OrderedDict
 
 import magellan.core.catalog as catalog
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 def read_csv(filepath, **kwargs):
@@ -16,8 +15,8 @@ def read_csv(filepath, **kwargs):
         metadata, numlines = get_metadata_from_file(filename)
     else:
         metadata = {}
-    metadata, kwargs = update_metadata(metadata, **kwargs)
-    check_metadata(metadata)
+    metadata, kwargs = update_metadata_for_read_cmd(metadata, **kwargs)
+    check_metadata_for_read_cmd(metadata)
     df = pd.read_csv(filepath, **kwargs)
     key = metadata.pop('key', None)
     if key is not None:
@@ -69,26 +68,26 @@ def is_metadata_file_present(filepath):
 
 def get_metadata_from_file(filepath):
     metadata = dict()
-    num_lines = 0
-    with open(filepath) as f:
-        stop_flag = False
-        while stop_flag == False:
-            line = next(f)
-            if line.startswith('#'):
-                line = line.lstrip('#')
-                tokens = line.split('=')
-                assert len(tokens) is 2, "Error in file, the num tokens is not 2"
-                key = tokens[0].strip()
-                value = tokens[1].strip()
-                if value is not "POINTER":
-                    metadata[key] = value
-                num_lines += 1
+    num_lines = sum(1 for line in open(filepath))
 
-            else:
-                stop_flag = True
+    if num_lines > 0:
+        with open(filepath) as f:
+            for i in range(num_lines):
+                line = next(f)
+                if line.startswith('#'):
+                    line = line.lstrip('#')
+                    tokens = line.split('=')
+                    assert len(tokens) is 2, "Error in file, the num tokens is not 2"
+                    key = tokens[0].strip()
+                    value = tokens[1].strip()
+                    if value is not "POINTER":
+                        metadata[key] = value
+                else:
+                    stop_flag = True
+
     return metadata, num_lines
 
-def update_metadata(metadata, **kwargs):
+def update_metadata_for_read_cmd(metadata, **kwargs):
     # first update
     for k in metadata.keys():
         if kwargs.has_key(k):
@@ -114,7 +113,7 @@ def update_metadata(metadata, **kwargs):
 
 
 
-def check_metadata(metadata):
+def check_metadata_for_read_cmd(metadata):
     vtable_props = ['ltable', 'rtable', 'foreign_key_ltable', 'foreign_key_rtable']
     v = set(vtable_props)
     k = set(metadata.keys())
@@ -125,7 +124,7 @@ def check_metadata(metadata):
                                   'foreign_key_rtable parameters set')
 
         if isinstance(metadata['ltable'], pd.DataFrame) == False:
-            raise AssertionError('The parameter ltable must be set to valid MTable')
+            raise AssertionError('The parameter ltable must be set to valid DataFrame')
         if isinstance(metadata['rtable'], pd.DataFrame) == False:
             raise AssertionError('The parameter rtable must be set to valid MTable')
     return True
