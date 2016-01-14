@@ -6,7 +6,7 @@ import logging
 
 from magellan.blocker.blocker import Blocker
 import magellan.core.catalog as cg
-import magellan.utils.helperfunctions as helper
+import magellan.utils.metadata_utils as md_utils
 
 class AttrEquivalenceBlocker(Blocker):
 
@@ -19,18 +19,18 @@ class AttrEquivalenceBlocker(Blocker):
         # get metadata
 
         # ltable
-        ltable_metadata = helper.get_reqd_metdata_from_catalog(ltable, ltable_reqd_metadata)
+        ltable_metadata = md_utils.get_reqd_metdata_from_catalog(ltable, ltable_reqd_metadata)
         if l_key is not None:
             ltable_metadata['key'] = l_key
-        l_diff_reqd_metadata = list(helper.get_diff_with_reqd_metadata(ltable_metadata, ltable_reqd_metadata))
+        l_diff_reqd_metadata = list(md_utils.get_diff_with_reqd_metadata(ltable_metadata, ltable_reqd_metadata))
         assert len(l_diff_reqd_metadata) == 0, \
             'The following metadata for ltable is missing : ' + str(l_diff_reqd_metadata)
 
         # rtable
-        rtable_metadata = helper.get_reqd_metdata_from_catalog(ltable, ltable_reqd_metadata)
+        rtable_metadata = md_utils.get_reqd_metdata_from_catalog(ltable, ltable_reqd_metadata)
         if r_key is not None:
             rtable_metadata['key'] = l_key
-        r_diff_reqd_metadata = list(helper.get_diff_with_reqd_metadata(rtable_metadata, rtable_reqd_metadata))
+        r_diff_reqd_metadata = list(md_utils.get_diff_with_reqd_metadata(rtable_metadata, rtable_reqd_metadata))
         assert len(r_diff_reqd_metadata) == 0, \
             'The following metadata for ltable is missing : ' + str(r_diff_reqd_metadata)
 
@@ -44,11 +44,11 @@ class AttrEquivalenceBlocker(Blocker):
         # check constraints
         # check key constraints
         # ltable
-        lkey_status = helper.is_key_attribute(ltable, ltable_metadata['key'])
+        lkey_status = md_utils.is_key_attribute(ltable, ltable_metadata['key'])
         assert lkey_status==False, 'ltable key attribute ' + ltable_metadata['key'] + ' does not qualify to be a key'
 
         # rtable
-        rkey_status = helper.is_key_attribute(rtable, rtable_metadata['key'])
+        rkey_status = md_utils.is_key_attribute(rtable, rtable_metadata['key'])
         assert rkey_status==False, 'rtable key attribute ' + rtable_metadata['key'] + ' does not qualify to be a key'
 
         # -- check attrs
@@ -81,7 +81,7 @@ class AttrEquivalenceBlocker(Blocker):
 
         reqd_metadata = ['key', 'ltable', 'rtable', 'foreign_key_ltable', 'foreign_key_rtable']
 
-        metadata = helper.get_reqd_metdata_from_catalog(candset, reqd_metadata)
+        metadata = md_utils.get_reqd_metdata_from_catalog(candset, reqd_metadata)
         # update using kw args
         if key is not None:
             metadata['key'] = key
@@ -95,19 +95,19 @@ class AttrEquivalenceBlocker(Blocker):
             metadata['foreign_key_rtable'] = foreign_key_rtable
 
         # check diff
-        diff_metadata = list(helper.get_diff_with_reqd_metadata(metadata, reqd_metadata))
+        diff_metadata = list(md_utils.get_diff_with_reqd_metadata(metadata, reqd_metadata))
         assert len(diff_metadata) == 0, \
             'The following metadata is missing : ' + str(diff_metadata)
 
 
         # constraints
-        key_status = helper.is_key_attribute(candset, metadata['key'])
+        key_status = md_utils.is_key_attribute(candset, metadata['key'])
         assert key_status == True, "The key attribute " + metadata['key'] + " does not quality to be a key"
         # fk constraints
         assert cg.get_key(ltable) != None, 'Key for ltable is not set'
         assert cg.get_key(rtable) != None, 'Key for rtable is not set'
-        l_fk_status = helper.check_fk_constraint(candset, metadata['foreign_key_ltable'], ltable, cg.get_key(ltable))
-        r_fk_status = helper.check_fk_constraint(candset, metadata['foreign_key_rtable'], rtable, cg.get_key(rtable))
+        l_fk_status = md_utils.check_fk_constraint(candset, metadata['foreign_key_ltable'], ltable, cg.get_key(ltable))
+        r_fk_status = md_utils.check_fk_constraint(candset, metadata['foreign_key_rtable'], rtable, cg.get_key(rtable))
 
         assert l_fk_status == True, 'Attribute ' + metadata['foreign_key_ltable'] + ' does not satisfy ' \
                                                                                     'foreign key constraint'

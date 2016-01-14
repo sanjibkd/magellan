@@ -1,5 +1,5 @@
 import logging
-import numpy as np
+import magellan.utils.metadata_utils as md_utils
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +206,7 @@ def get_key(df):
 
 
 def set_key(df, key):
-    if is_key_attribute(df, key) == False:
+    if md_utils.is_key_attribute(df, key) == False:
         logger.warning('Attribute ('+key+') does not qualify to be a key')
         return False
     else:
@@ -215,18 +215,18 @@ def set_key(df, key):
 
 
 
-def is_key_attribute(df, key):
-    # check if the length is > 0
-    if len(df) > 0:
-        # check for uniqueness
-        uniq_flag = len(np.unique(df[key])) == len(df)
-        if not uniq_flag:
-            logger.warning('Attribute contains duplicate values')
-
-        # check if there are missing or null values
-        nan_flag = sum(df[key].isnull()) == 0
-        if not nan_flag:
-            logger.warning('Attribute contains missing values')
-        return uniq_flag and nan_flag
-    else:
-        return True
+# def is_key_attribute(df, key):
+#     # check if the length is > 0
+#     if len(df) > 0:
+#         # check for uniqueness
+#         uniq_flag = len(np.unique(df[key])) == len(df)
+#         if not uniq_flag:
+#             logger.warning('Attribute contains duplicate values')
+#
+#         # check if there are missing or null values
+#         nan_flag = sum(df[key].isnull()) == 0
+#         if not nan_flag:
+#             logger.warning('Attribute contains missing values')
+#         return uniq_flag and nan_flag
+#     else:
+#         return True
