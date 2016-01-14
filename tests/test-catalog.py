@@ -19,15 +19,15 @@ print mg.is_dfinfo_present(B)
 mg.set_key(B, 'ID')
 
 print mg.is_dfinfo_present(B)
-print mg.is_metadata_present_for_df(B, 'ltable')
+print mg.is_property_present_for_df(B, 'ltable')
 
 print mg.get_catalog_len()
 
-mg.del_metadata(B, 'key')
-print mg.is_metadata_present_for_df(B, 'ID')
+mg.del_property(B, 'key')
+print mg.is_property_present_for_df(B, 'ID')
 
 
-mg.del_all_metadata(A)
+mg.del_all_properties(A)
 print mg.get_catalog_len()
 
 

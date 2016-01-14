@@ -69,10 +69,10 @@ class AttrEquivalenceBlocker(Blocker):
         candset.columns = final_cols
 
         cg.set_key(candset, '_id')
-        cg.set_metadata(candset, 'ltable', ltable)
-        cg.set_metadata(candset, 'rtable', rtable)
-        cg.set_metadata(candset, 'foreign_key_ltable', 'ltable.' + ltable_metadata['key'])
-        cg.set_metadata(candset, 'foreogn_key_rtable', 'rtable.'+rtable_metadata['key'])
+        cg.set_property(candset, 'ltable', ltable)
+        cg.set_property(candset, 'rtable', rtable)
+        cg.set_property(candset, 'foreign_key_ltable', 'ltable.' + ltable_metadata['key'])
+        cg.set_property(candset, 'foreogn_key_rtable', 'rtable.' + rtable_metadata['key'])
 
         return candset
 

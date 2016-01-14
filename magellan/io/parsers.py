@@ -22,7 +22,7 @@ def read_csv(filepath, **kwargs):
     if key is not None:
         catalog.set_key(df, key)
     for k, v in metadata.iteritems():
-        catalog.set_metadata(df, k, v)
+        catalog.set_property(df, k, v)
     return df
 
 
@@ -45,7 +45,7 @@ def to_csv(df, filepath, **kwargs):
 def write_metadata(df, filepath):
     metadata_dict = OrderedDict()
     if catalog.is_dfinfo_present(df) == True:
-        d = catalog.get_all_metadata(df)
+        d = catalog.get_all_properties(df)
     if len(d) > 0:
         for k, v in d.iteritems():
             if isinstance(v, basestring) is False:

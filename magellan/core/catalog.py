@@ -43,71 +43,83 @@ class Singleton:
 class Catalog(object):
 
     def __init__(self):
-        self.metadata_catalog = {}
+        self.properties_catalog = {}
 
-
-    def init_metadata(self, df):
+    def init_properties(self, df):
         df_id = id(df)
-        self.metadata_catalog[df_id] = {}
+        self.properties_catalog[df_id] = {}
         return True
 
-    def get_metadata(self, df, name):
+    def get_property(self, df, name):
         df_id = id(df)
-        d = self.metadata_catalog[df_id]
+        d = self.properties_catalog[df_id]
         return d[name]
 
-
-    def set_metadata(self, df, name, value):
+    def set_property(self, df, name, value):
         df_id = id(df)
-        d = self.metadata_catalog[df_id]
+        d = self.properties_catalog[df_id]
         d[name] = value
-        self.metadata_catalog[df_id] = d
+        self.properties_catalog[df_id] = d
         return True
 
-    def get_all_metadata(self, df):
+    def get_all_properties(self, df):
         df_id = id(df)
-        d = self.metadata_catalog[df_id]
+        d = self.properties_catalog[df_id]
         return d
 
-    def del_metadata(self, df, name):
+    def del_property(self, df, name):
         df_id = id(df)
-        d = self.metadata_catalog[df_id]
+        d = self.properties_catalog[df_id]
         del d[name]
-        self.metadata_catalog[df_id] = d
+        self.properties_catalog[df_id] = d
         return True
 
-    def del_all_metadata(self, df):
+    def del_all_properties(self, df):
         df_id = id(df)
-        del self.metadata_catalog[df_id]
+        del self.properties_catalog[df_id]
         return True
-
 
     def get_catalog(self):
-        return self.metadata_catalog
+        return self.properties_catalog
 
     def del_catalog(self):
-        self.metadata_catalog = {}
+        self.properties_catalog = {}
         return True
 
     def get_catalog_len(self):
-        return len(self.metadata_catalog)
+        return len(self.properties_catalog)
 
     def is_catalog_empty(self):
-        return self.metadata_catalog > 0
-
+        return self.properties_catalog > 0
 
     def is_dfinfo_present(self, df):
-        return id(df) in self.metadata_catalog
+        return id(df) in self.properties_catalog
 
     def is_metadata_present_for_df(self, df, name):
         df_id = id(df)
-        d = self.metadata_catalog[df_id]
+        d = self.properties_catalog[df_id]
         return name in d
 
 
+def get_property(df, name):
+    """
+    Get property for a dataframe
 
+    Parameters
+    ----------
+    df : pandas DataFrame
+        Data frame object
 
-def get_metadata(df, name):
+    name : str
+        Property name
+
+    Returns
+    -------
+    result : object
+        Property value for the given name
+
+    """
+
     catalog = Catalog.Instance()
 
     if df is None:
@@ -119,20 +131,22 @@ def get_metadata(df, name):
     if catalog.is_metadata_present_for_df(df, name) == False:
         raise KeyError('Requested metadata (' + name + ') for the given dataframe is not present in the catalog')
 
-    return catalog.get_metadata(df, name)
+    return catalog.get_property(df, name)
 
-def set_metadata(df, name, value):
+
+def set_property(df, name, value):
     catalog = Catalog.Instance()
 
     if df is None:
         raise AttributeError('Input dataframe cannot be null')
 
     if catalog.is_dfinfo_present(df) == False:
-        catalog.init_metadata(df)
+        catalog.init_properties(df)
 
-    catalog.set_metadata(df, name, value)
+    catalog.set_property(df, name, value)
 
-def get_all_metadata(df):
+
+def get_all_properties(df):
     catalog = Catalog.Instance()
 
     if df is None:
@@ -141,10 +155,10 @@ def get_all_metadata(df):
     if catalog.is_dfinfo_present(df) == False:
         raise KeyError('Dataframe information is not present in the catalog')
 
-    return catalog.get_all_metadata(df)
+    return catalog.get_all_properties(df)
 
 
-def del_metadata(df, name):
+def del_property(df, name):
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
@@ -155,9 +169,10 @@ def del_metadata(df, name):
     if catalog.is_metadata_present_for_df(df, name) == False:
         raise KeyError('Requested metadata (' + name + ') for the given dataframe is not present in the catalog')
 
-    return catalog.del_metadata(df, name)
+    return catalog.del_property(df, name)
 
-def del_all_metadata(df):
+
+def del_all_properties(df):
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
@@ -165,15 +180,18 @@ def del_all_metadata(df):
     if catalog.is_dfinfo_present(df) == False:
         raise KeyError('Dataframe information is not present in the catalog')
 
-    return catalog.del_all_metadata(df)
+    return catalog.del_all_properties(df)
+
 
 def get_catalog():
     catalog = Catalog.Instance()
     return catalog.get_catalog()
 
+
 def del_catalog():
     catalog = Catalog.Instance()
     return catalog.del_catalog()
+
 
 def is_catalog_empty():
     catalog = Catalog.Instance()
@@ -186,7 +204,8 @@ def is_dfinfo_present(df):
 
     return catalog.is_dfinfo_present(df)
 
-def is_metadata_present_for_df(df, name):
+
+def is_property_present_for_df(df, name):
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
@@ -196,13 +215,15 @@ def is_metadata_present_for_df(df, name):
 
     return catalog.is_metadata_present_for_df(df, name)
 
+
 def get_catalog_len():
     catalog = Catalog.Instance()
     return catalog.get_catalog_len()
 
+
 # key related methods
 def get_key(df):
-    return get_metadata(df, 'key')
+    return get_property(df, 'key')
 
 
 def set_key(df, key):
@@ -210,23 +231,4 @@ def set_key(df, key):
         logger.warning('Attribute ('+key+') does not qualify to be a key')
         return False
     else:
-        return set_metadata(df, 'key', key)
-
-
-
-
-# def is_key_attribute(df, key):
-#     # check if the length is > 0
-#     if len(df) > 0:
-#         # check for uniqueness
-#         uniq_flag = len(np.unique(df[key])) == len(df)
-#         if not uniq_flag:
-#             logger.warning('Attribute contains duplicate values')
-#
-#         # check if there are missing or null values
-#         nan_flag = sum(df[key].isnull()) == 0
-#         if not nan_flag:
-#             logger.warning('Attribute contains missing values')
-#         return uniq_flag and nan_flag
-#     else:
-#         return True
+        return set_property(df, 'key', key)
