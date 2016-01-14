@@ -232,4 +232,3 @@ def set_key(df, key):
         return False
     else:
         return set_property(df, 'key', key)
-
