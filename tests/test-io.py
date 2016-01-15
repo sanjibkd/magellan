@@ -1,9 +1,9 @@
 import magellan as mg
-A = mg.read_csv('../magellan/datasets/table_A.csv', key='ID')
+A = mg.read_csv_metadata('../magellan/datasets/table_A.csv', key='ID')
 print mg.get_catalog()
 # mg.to_csv(A, '../magellan/datasets/A.csv')
 print 'Hello'
-B = mg.read_csv('../magellan/datasets/A.csv', key='ID')
+B = mg.read_csv_metadata('../magellan/datasets/A.csv', key='ID')
 print mg.get_catalog()
 
 # filepath = '../magellan/datasets/A.metadata'

@@ -1,9 +1,11 @@
-
-from magellan.core.catalog import get_all_properties
-import numpy as np 
+import numpy as np
 import pandas as pd
 import logging
+from magellan.core.catalog import get_all_properties
+from magellan.utils.helperfunctions import is_key_attribute
+
 logger = logging.getLogger(__name__)
+
 
 
 def get_reqd_metdata_from_catalog(df, reqd_metadata):
@@ -47,25 +49,7 @@ def check_fk_constraint(df, fk, df_base, key):
     return is_key_attribute(t, key)
 
 
-def is_key_attribute(df, key, verbose=False):
-    # check if the length is > 0
-    if len(df) > 0:
-        # check for uniqueness
-        uniq_flag = len(np.unique(df[key])) == len(df)
-        if not uniq_flag:
-            if verbose:
-                logger.warning('Attribute ' + key + ' does not contain unique values')
-            return False
 
-        # check if there are missing or null values
-        nan_flag = sum(df[key].isnull()) == 0
-        if not nan_flag:
-            if verbose:
-                logger.warning('Attribute ' + key + ' contains missing values')
-            return False
-        return uniq_flag and nan_flag
-    else:
-        return True
 
 def does_contain_rows(df):
     return len(df) > 0
