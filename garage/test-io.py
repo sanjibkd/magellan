@@ -6,7 +6,7 @@ print 'Hello'
 B = mg.read_csv_metadata('../magellan/datasets/A.csv', key='ID')
 print mg.get_catalog()
 
-# filepath = '../magellan/datasets/A.metadata'
+# filepath = '../magellan/datasets/A.metadata_'
 # metadata = dict()
 # num_lines = 0
 #

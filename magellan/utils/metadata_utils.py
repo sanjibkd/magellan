@@ -7,7 +7,6 @@ from magellan.utils.helperfunctions import is_key_attribute
 logger = logging.getLogger(__name__)
 
 
-
 def get_reqd_metdata_from_catalog(df, reqd_metadata):
     if isinstance(reqd_metadata, list) == False:
         reqd_metadata = [reqd_metadata]
@@ -29,6 +28,7 @@ def update_reqd_metadata_with_kwargs(metadata, kwargs_dict, reqd_metadata):
             metadata[m] = kwargs_dict[m]
     return metadata
 
+
 def get_diff_with_reqd_metadata(metadata, reqd_metadata):
     k = metadata.keys()
     if isinstance(reqd_metadata, list) == False:
@@ -44,11 +44,10 @@ def is_all_reqd_metadata_present(metadata, reqd_metadata):
     else:
         return False
 
+
 def check_fk_constraint(df, fk, df_base, key):
     t = df_base[df_base[key].isin(pd.unique(df[fk]))]
     return is_key_attribute(t, key)
-
-
 
 
 def does_contain_rows(df):

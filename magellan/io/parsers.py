@@ -30,7 +30,7 @@ def read_csv_metadata(file_path, **kwargs):
     --------
     >>> import magellan as mg
     >>> A = mg.read_csv_metadata('A.csv')
-    # if A.metadata is present along with A.csv, the metadata information
+    # if A.metadata_ is present along with A.csv, the metadata information
     # will be updated for A
     >>> A.get_key()
 
