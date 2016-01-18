@@ -197,6 +197,7 @@ def is_catalog_empty():
     catalog = Catalog.Instance()
     return catalog.is_catalog_empty()
 
+
 def is_dfinfo_present(df):
     catalog = Catalog.Instance()
     if df is None:
@@ -210,7 +211,7 @@ def is_property_present_for_df(df, name):
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
 
-    if catalog.is_dfinfo_present(df) == False:
+    if catalog.is_dfinfo_present(df) is False:
         raise KeyError('Dataframe information is not present in the catalog')
 
     return catalog.is_metadata_present_for_df(df, name)
@@ -227,7 +228,7 @@ def get_key(df):
 
 
 def set_key(df, key):
-    if helper.is_key_attribute(df, key) == False:
+    if helper.is_key_attribute(df, key) is False:
         logger.warning('Attribute ('+key+') does not qualify to be a key')
         return False
     else:

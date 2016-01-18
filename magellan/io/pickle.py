@@ -87,7 +87,7 @@ def save_table_metadata(df, file_path):
 
     # write metadata contents
     with open(metadata_filename, 'w') as f:
-        cloud.serialization.cloudpickle(metadata_dict, f)
+        cloud.serialization.cloudpickle.dump(metadata_dict, f)
 
     return True
 
