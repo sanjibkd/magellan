@@ -7,7 +7,7 @@ from magellan.utils.helperfunctions import is_key_attribute
 logger = logging.getLogger(__name__)
 
 
-def get_reqd_metdata_from_catalog(df, reqd_metadata):
+def get_reqd_metadata_from_catalog(df, reqd_metadata):
     if isinstance(reqd_metadata, list) == False:
         reqd_metadata = [reqd_metadata]
 

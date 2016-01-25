@@ -19,7 +19,7 @@ class AttrEquivalenceBlocker(Blocker):
         # get metadata
 
         # ltable
-        ltable_metadata = md_utils.get_reqd_metdata_from_catalog(ltable, ltable_reqd_metadata)
+        ltable_metadata = md_utils.get_reqd_metadata_from_catalog(ltable, ltable_reqd_metadata)
         if l_key is not None:
             ltable_metadata['key'] = l_key
         l_diff_reqd_metadata = list(md_utils.get_diff_with_reqd_metadata(ltable_metadata, ltable_reqd_metadata))
@@ -27,7 +27,7 @@ class AttrEquivalenceBlocker(Blocker):
             'The following metadata for ltable is missing : ' + str(l_diff_reqd_metadata)
 
         # rtable
-        rtable_metadata = md_utils.get_reqd_metdata_from_catalog(ltable, ltable_reqd_metadata)
+        rtable_metadata = md_utils.get_reqd_metadata_from_catalog(ltable, ltable_reqd_metadata)
         if r_key is not None:
             rtable_metadata['key'] = l_key
         r_diff_reqd_metadata = list(md_utils.get_diff_with_reqd_metadata(rtable_metadata, rtable_reqd_metadata))
@@ -81,7 +81,7 @@ class AttrEquivalenceBlocker(Blocker):
 
         reqd_metadata = ['key', 'ltable', 'rtable', 'foreign_key_ltable', 'foreign_key_rtable']
 
-        metadata = md_utils.get_reqd_metdata_from_catalog(candset, reqd_metadata)
+        metadata = md_utils.get_reqd_metadata_from_catalog(candset, reqd_metadata)
         # update using kw args
         if key is not None:
             metadata['key'] = key
