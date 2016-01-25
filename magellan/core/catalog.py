@@ -1,5 +1,6 @@
 import logging
 import magellan.utils.helperfunctions as helper
+import magellan.utils.metadata_utils
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +229,7 @@ def get_key(df):
 
 
 def set_key(df, key):
-    if helper.is_key_attribute(df, key) is False:
+    if magellan.utils.metadata_utils.is_key_attribute(df, key) is False:
         logger.warning('Attribute ('+key+') does not qualify to be a key')
         return False
     else:

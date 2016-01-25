@@ -44,11 +44,11 @@ class AttrEquivalenceBlocker(Blocker):
         # check constraints
         # check key constraints
         # ltable
-        lkey_status = md_utils.is_key_attribute(ltable, ltable_metadata['key'])
+        lkey_status = magellan.utils.metadata_utils.is_key_attribute(ltable, ltable_metadata['key'])
         assert lkey_status==False, 'ltable key attribute ' + ltable_metadata['key'] + ' does not qualify to be a key'
 
         # rtable
-        rkey_status = md_utils.is_key_attribute(rtable, rtable_metadata['key'])
+        rkey_status = magellan.utils.metadata_utils.is_key_attribute(rtable, rtable_metadata['key'])
         assert rkey_status==False, 'rtable key attribute ' + rtable_metadata['key'] + ' does not qualify to be a key'
 
         # -- check attrs
@@ -67,6 +67,7 @@ class AttrEquivalenceBlocker(Blocker):
 
         candset = candset[retain_cols]
         candset.columns = final_cols
+        candset.insert
 
         cg.set_key(candset, '_id')
         cg.set_property(candset, 'ltable', ltable)
@@ -101,7 +102,7 @@ class AttrEquivalenceBlocker(Blocker):
 
 
         # constraints
-        key_status = md_utils.is_key_attribute(candset, metadata['key'])
+        key_status = magellan.utils.metadata_utils.is_key_attribute(candset, metadata['key'])
         assert key_status == True, "The key attribute " + metadata['key'] + " does not quality to be a key"
         # fk constraints
         assert cg.get_key(ltable) != None, 'Key for ltable is not set'

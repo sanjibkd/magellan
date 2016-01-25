@@ -32,7 +32,7 @@ class Blocker(object):
 
         # check key
         if check_key:
-            status = utils.is_key_attribute(table, metadata['key'])
+            status = magellan.utils.metadata_utils.is_key_attribute(table, metadata['key'])
             assert status == True, error_str + ' key attribute ' + metadata['key'] + ' does not qualify to be a key'
         return metadata
 
@@ -60,7 +60,7 @@ class Blocker(object):
         # check metadata
 
         # key
-        key_status = utils.is_key_attribute(candset, metadata['key'])
+        key_status = magellan.utils.metadata_utils.is_key_attribute(candset, metadata['key'])
         assert key_status == True, 'The key attribute ' + metadata['key'] + ' does not qualify to be a key'
 
         # fk

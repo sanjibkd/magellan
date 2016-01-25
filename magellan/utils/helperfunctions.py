@@ -1,7 +1,8 @@
 import logging
-import numpy as np
 import os
+
 from magellan.utils import install_path
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,28 +17,25 @@ def are_all_attributes_present(df, col_names, verbose=False):
     return True
 
 
-def is_key_attribute(df, key, verbose=False):
-    # check if the length is > 0
-    if len(df) > 0:
-        # check for uniqueness
-        uniq_flag = len(np.unique(df[key])) == len(df)
-        if not uniq_flag:
-            if verbose:
-                logger.warning('Attribute ' + key + ' does not contain unique values')
-            return False
-
-        # check if there are missing or null values
-        nan_flag = sum(df[key].isnull()) == 0
-        if not nan_flag:
-            if verbose:
-                logger.warning('Attribute ' + key + ' contains missing values')
-            return False
-        return uniq_flag and nan_flag
-    else:
-        return True
-
-
 def get_install_path():
     plist = install_path.split(os.sep)
     return os.sep.join(plist[0:len(plist)-1])
 
+
+def add_key_column(table, key):
+    table.insert(0, key, range(0, len(table)))
+    return table
+
+
+def get_name_for_key(self, columns):
+    k = '_id'
+    i = 0
+    # try attribute name of the form "_id", "_id0", "_id1", ... and
+    # return the first available name
+    while True:
+        if k not in columns:
+            break
+        else:
+            k = '_id' + str(i)
+        i += 1
+    return k

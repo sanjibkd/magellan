@@ -1,8 +1,10 @@
+import logging
+
 import numpy as np
 import pandas as pd
-import logging
-from magellan.core.catalog import get_all_properties
-from magellan.utils.helperfunctions import is_key_attribute
+
+import magellan.core.catalog as cg
+
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ def get_reqd_metadata_from_catalog(df, reqd_metadata):
         reqd_metadata = [reqd_metadata]
 
     metadata = {}
-    d = get_all_properties(df)
+    d = cg.get_all_properties(df)
     for m in reqd_metadata:
         if m in d:
             metadata[m] = d[m]
@@ -66,5 +68,28 @@ def does_contain_missing_vals(df, key):
     nan_flag = sum(df[key].isnull()) == 0
     if not nan_flag:
         return False
+    else:
+        return True
+
+
+
+
+def is_key_attribute(df, key, verbose=False):
+    # check if the length is > 0
+    if len(df) > 0:
+        # check for uniqueness
+        uniq_flag = len(np.unique(df[key])) == len(df)
+        if not uniq_flag:
+            if verbose:
+                logger.warning('Attribute ' + key + ' does not contain unique values')
+            return False
+
+        # check if there are missing or null values
+        nan_flag = sum(df[key].isnull()) == 0
+        if not nan_flag:
+            if verbose:
+                logger.warning('Attribute ' + key + ' contains missing values')
+            return False
+        return uniq_flag and nan_flag
     else:
         return True
