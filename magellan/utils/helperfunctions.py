@@ -27,7 +27,7 @@ def add_key_column(table, key):
     return table
 
 
-def get_name_for_key(self, columns):
+def get_name_for_key(columns):
     k = '_id'
     i = 0
     # try attribute name of the form "_id", "_id0", "_id1", ... and

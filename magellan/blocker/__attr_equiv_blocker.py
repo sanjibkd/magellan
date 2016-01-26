@@ -19,18 +19,20 @@ class AttrEquivalenceBlocker(Blocker):
         # get metadata
 
         # ltable
-        ltable_metadata = md_utils.get_reqd_metadata_from_catalog(ltable, ltable_reqd_metadata)
+        ltable_metadata = magellan.core.catalog.get_reqd_metadata_from_catalog(ltable, ltable_reqd_metadata)
         if l_key is not None:
             ltable_metadata['key'] = l_key
-        l_diff_reqd_metadata = list(md_utils.get_diff_with_reqd_metadata(ltable_metadata, ltable_reqd_metadata))
+        l_diff_reqd_metadata = list(
+            magellan.core.catalog.get_diff_with_reqd_metadata(ltable_metadata, ltable_reqd_metadata))
         assert len(l_diff_reqd_metadata) == 0, \
             'The following metadata for ltable is missing : ' + str(l_diff_reqd_metadata)
 
         # rtable
-        rtable_metadata = md_utils.get_reqd_metadata_from_catalog(ltable, ltable_reqd_metadata)
+        rtable_metadata = magellan.core.catalog.get_reqd_metadata_from_catalog(ltable, ltable_reqd_metadata)
         if r_key is not None:
             rtable_metadata['key'] = l_key
-        r_diff_reqd_metadata = list(md_utils.get_diff_with_reqd_metadata(rtable_metadata, rtable_reqd_metadata))
+        r_diff_reqd_metadata = list(
+            magellan.core.catalog.get_diff_with_reqd_metadata(rtable_metadata, rtable_reqd_metadata))
         assert len(r_diff_reqd_metadata) == 0, \
             'The following metadata for ltable is missing : ' + str(r_diff_reqd_metadata)
 
@@ -82,7 +84,7 @@ class AttrEquivalenceBlocker(Blocker):
 
         reqd_metadata = ['key', 'ltable', 'rtable', 'foreign_key_ltable', 'foreign_key_rtable']
 
-        metadata = md_utils.get_reqd_metadata_from_catalog(candset, reqd_metadata)
+        metadata = magellan.core.catalog.get_reqd_metadata_from_catalog(candset, reqd_metadata)
         # update using kw args
         if key is not None:
             metadata['key'] = key
@@ -96,7 +98,7 @@ class AttrEquivalenceBlocker(Blocker):
             metadata['foreign_key_rtable'] = foreign_key_rtable
 
         # check diff
-        diff_metadata = list(md_utils.get_diff_with_reqd_metadata(metadata, reqd_metadata))
+        diff_metadata = list(magellan.core.catalog.get_diff_with_reqd_metadata(metadata, reqd_metadata))
         assert len(diff_metadata) == 0, \
             'The following metadata is missing : ' + str(diff_metadata)
 
@@ -107,8 +109,8 @@ class AttrEquivalenceBlocker(Blocker):
         # fk constraints
         assert cg.get_key(ltable) != None, 'Key for ltable is not set'
         assert cg.get_key(rtable) != None, 'Key for rtable is not set'
-        l_fk_status = md_utils.check_fk_constraint(candset, metadata['foreign_key_ltable'], ltable, cg.get_key(ltable))
-        r_fk_status = md_utils.check_fk_constraint(candset, metadata['foreign_key_rtable'], rtable, cg.get_key(rtable))
+        l_fk_status = magellan.core.catalog.check_fk_constraint(candset, metadata['foreign_key_ltable'], ltable, cg.get_key(ltable))
+        r_fk_status = magellan.core.catalog.check_fk_constraint(candset, metadata['foreign_key_rtable'], rtable, cg.get_key(rtable))
 
         assert l_fk_status == True, 'Attribute ' + metadata['foreign_key_ltable'] + ' does not satisfy ' \
                                                                                     'foreign key constraint'

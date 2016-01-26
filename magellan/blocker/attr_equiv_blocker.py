@@ -1,4 +1,6 @@
 import pandas as pd
+import pyprind
+import numpy as np
 
 import magellan.utils.helperfunctions
 from magellan.blocker.blocker import Blocker
@@ -29,10 +31,12 @@ class AttrEquivalenceBlocker(Blocker):
         r_df = self.rem_nan(rtable, r_block_attr)
 
         # do the blocking
-        candset = pd.merge(l_df, r_df, left_on=l_block_attr, right_on=r_block_attr, suffixes=('_ltable', '_rtable'))
+        candset = pd.merge(l_df, r_df, left_on=l_block_attr, right_on=r_block_attr,
+                           suffixes=('_ltable', '_rtable'))
 
         # get output columns
-        retain_cols, final_cols = self.output_columns(cg.get_key(ltable), cg.get_key(rtable), list(candset.columns),
+        retain_cols, final_cols = self.output_columns(cg.get_key(ltable),
+                                                      cg.get_key(rtable), list(candset.columns),
                                                       l_output_attrs, r_output_attrs)
 
         # project and rename columns
@@ -49,6 +53,74 @@ class AttrEquivalenceBlocker(Blocker):
         cg.set_property(candset, 'fk_rtable', 'rtable.'+r_metadata['key'])
 
         return candset
+
+    def block_candset(self, candset, l_block_attr, r_block_attr,
+                      key=None, fk_ltable=None, ltable=None, fk_rtable=None, rtable=None):
+
+        # get metadata
+        metadata = self.process_candset_metadata(candset, key, fk_ltable, ltable, fk_rtable, rtable)
+
+        fk_ltable, ltable = metadata['fk_ltable'], metadata['ltable']
+        fk_rtable, rtable = metadata['fk_rtable'], metadata['rtable']
+        l_key, r_key = cg.get_key(ltable), cg.get_key(rtable)
+
+
+        status = self.check_attrs_present(ltable, l_block_attr)
+        assert status is True, 'Left block attribute is not present in left table'
+
+        status = self.check_attrs_present(rtable, r_block_attr)
+        assert status is True, 'Right block attribute is not present in right table'
+
+        l_df, r_df = ltable.copy(), rtable.copy()
+
+
+        # # set index for convenience
+        l_df.set_index(l_key, inplace=True)
+        r_df.set_index(r_key, inplace=True)
+
+        bar = pyprind.ProgBar(len(candset))
+
+        # create look up table for quick access of rows
+        l_dict = {}
+        for k, r in l_df.iterrows():
+            l_dict[k] = r
+        r_dict = {}
+        for k, r in r_df.iterrows():
+            r_dict[k] = r
+
+        valid = []
+        column_names = list(candset.columns)
+        lid_idx = column_names.index(fk_ltable)
+        rid_idx = column_names.index(fk_rtable)
+
+        for row in candset.itertuples(index=False):
+            bar.update()
+            l_row = l_dict[row[lid_idx]]
+            r_row = r_dict[row[rid_idx]]
+            l_val = l_row[l_block_attr]
+            r_val = r_row[r_block_attr]
+            if l_val != np.NaN and r_val != np.NaN:
+                if l_val == r_val:
+                    valid.append(True)
+                else:
+                    valid.append(False)
+            else:
+                valid.append(False)
+
+
+
+        if len(candset) > 0:
+            out_table = candset[valid]
+            cg.set_key(out_table, metadata['key'])
+        else:
+            out_table = pd.DataFrame(columns=candset.columns)
+            cg.set_key(out_table, metadata['key'])
+
+        cg.set_property(out_table, 'ltable', ltable)
+        cg.set_property(out_table, 'rtable', rtable)
+        cg.set_property(out_table, 'fk_ltable', fk_ltable)
+        cg.set_property(out_table, 'fk_rtable', fk_rtable)
+        return out_table
 
 
 
