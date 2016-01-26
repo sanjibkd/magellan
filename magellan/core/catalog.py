@@ -227,6 +227,25 @@ def get_catalog_len():
     return catalog.get_catalog_len()
 
 
+def set_properties(df, prop_dict, replace=True):
+    catalog = Catalog.Instance()
+    if catalog.is_dfinfo_present(df) == True:
+        if replace is False:
+            logger.warning('Properties already exists for df (' +id(df) +' ). Not replacing it')
+            return False
+
+    catalog.del_all_properties(df)
+    for k, v in prop_dict.iteritems():
+        catalog.set_property(df, k, v)
+    return True
+
+
+def copy_properties(src, tar, replace=True):
+    # copy catalog information from src to tar
+    catalog = Catalog.Instance()
+    metadata = catalog.get_all_properties(src)
+    return set_properties(tar, metadata, replace)
+
 # key related methods
 def get_key(df):
     return get_property(df, 'key')
@@ -322,3 +341,5 @@ def is_key_attribute(df, key, verbose=False):
         return uniq_flag and nan_flag
     else:
         return True
+
+

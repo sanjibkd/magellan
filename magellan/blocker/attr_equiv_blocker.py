@@ -107,8 +107,6 @@ class AttrEquivalenceBlocker(Blocker):
             else:
                 valid.append(False)
 
-
-
         if len(candset) > 0:
             out_table = candset[valid]
             cg.set_key(out_table, metadata['key'])
@@ -123,6 +121,8 @@ class AttrEquivalenceBlocker(Blocker):
         return out_table
 
 
+    def block_tuples(self, ltuple, rtuple, l_block_attr, r_block_attr):
+        return ltuple[l_block_attr] != rtuple[r_block_attr]
 
 
 
