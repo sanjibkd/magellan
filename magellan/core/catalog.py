@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-import magellan.utils.metadata_utils
+# import magellan.utils.metadata
 
 
 logger = logging.getLogger(__name__)
@@ -130,10 +130,10 @@ def get_property(df, name):
     if df is None:
         raise AttributeError('Input dataframe cannot be null')
 
-    if catalog.is_dfinfo_present(df) == False:
+    if not catalog.is_dfinfo_present(df):
         raise KeyError('Dataframe information is not present in the catalog')
 
-    if catalog.is_metadata_present_for_df(df, name) == False:
+    if not catalog.is_metadata_present_for_df(df, name):
         raise KeyError('Requested metadata (' + name + ') for the given dataframe is not present in the catalog')
 
     return catalog.get_property(df, name)
@@ -145,7 +145,7 @@ def set_property(df, name, value):
     if df is None:
         raise AttributeError('Input dataframe cannot be null')
 
-    if catalog.is_dfinfo_present(df) == False:
+    if not catalog.is_dfinfo_present(df):
         catalog.init_properties(df)
 
     catalog.set_property(df, name, value)
@@ -157,7 +157,7 @@ def get_all_properties(df):
     if df is None:
         raise AttributeError('Input dataframe cannot be null')
 
-    if catalog.is_dfinfo_present(df) == False:
+    if not catalog.is_dfinfo_present(df):
         raise KeyError('Dataframe information is not present in the catalog')
 
     return catalog.get_all_properties(df)
@@ -168,10 +168,10 @@ def del_property(df, name):
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
 
-    if catalog.is_dfinfo_present(df) == False:
+    if not catalog.is_dfinfo_present(df):
         raise KeyError('Dataframe information is not present in the catalog')
 
-    if catalog.is_metadata_present_for_df(df, name) == False:
+    if not catalog.is_metadata_present_for_df(df, name):
         raise KeyError('Requested metadata (' + name + ') for the given dataframe is not present in the catalog')
 
     return catalog.del_property(df, name)
@@ -182,7 +182,7 @@ def del_all_properties(df):
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
 
-    if catalog.is_dfinfo_present(df) == False:
+    if not catalog.is_dfinfo_present(df):
         raise KeyError('Dataframe information is not present in the catalog')
 
     return catalog.del_all_properties(df)
@@ -229,7 +229,7 @@ def get_catalog_len():
 
 def set_properties(df, prop_dict, replace=True):
     catalog = Catalog.Instance()
-    if catalog.is_dfinfo_present(df) == True:
+    if catalog.is_dfinfo_present(df):
         if replace is False:
             logger.warning('Properties already exists for df (' +id(df) +' ). Not replacing it')
             return False
@@ -252,7 +252,7 @@ def get_key(df):
 
 
 def set_key(df, key):
-    if magellan.core.catalog.is_key_attribute(df, key) is False:
+    if is_key_attribute(df, key) is False:
         logger.warning('Attribute ('+key+') does not qualify to be a key')
         return False
     else:
@@ -260,7 +260,7 @@ def set_key(df, key):
 
 
 def get_reqd_metadata_from_catalog(df, reqd_metadata):
-    if isinstance(reqd_metadata, list) == False:
+    if not isinstance(reqd_metadata, list):
         reqd_metadata = [reqd_metadata]
 
     metadata = {}
@@ -272,7 +272,7 @@ def get_reqd_metadata_from_catalog(df, reqd_metadata):
 
 
 def update_reqd_metadata_with_kwargs(metadata, kwargs_dict, reqd_metadata):
-    if isinstance(reqd_metadata, list) == False:
+    if not isinstance(reqd_metadata, list):
         reqd_metadata = [reqd_metadata]
 
     for m in reqd_metadata:
@@ -283,7 +283,7 @@ def update_reqd_metadata_with_kwargs(metadata, kwargs_dict, reqd_metadata):
 
 def get_diff_with_reqd_metadata(metadata, reqd_metadata):
     k = metadata.keys()
-    if isinstance(reqd_metadata, list) == False:
+    if not isinstance(reqd_metadata, list):
         reqd_metadata = [reqd_metadata]
     d = set(reqd_metadata).difference(k)
     return d

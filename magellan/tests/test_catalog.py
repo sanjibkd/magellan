@@ -1,7 +1,7 @@
 import os
 from nose.tools import *
-from magellan.tests import mg
 
+import magellan as mg
 p = mg.get_install_path()
 path_for_A = os.sep.join([p, 'datasets', 'test_datasets', 'table_A.csv'])
 path_for_A_dup = os.sep.join([p, 'datasets', 'test_datasets', 'table_A_dupid.csv'])

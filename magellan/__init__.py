@@ -1,5 +1,8 @@
 from magellan.core.catalog import Catalog
 
+__version__ = '0.1.0'
+
+
 _catalog = Catalog.Instance()
 
 # import catalog related methods
@@ -22,3 +25,7 @@ from magellan.blocker.attr_equiv_blocker import AttrEquivalenceBlocker
 # logger
 import logging
 logging.basicConfig(level=logging.INFO)
+
+
+# helper functions
+from magellan.utils.helperfunctions import get_install_path

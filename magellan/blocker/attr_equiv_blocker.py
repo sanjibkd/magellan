@@ -5,7 +5,7 @@ import numpy as np
 import magellan.utils.helperfunctions
 from magellan.blocker.blocker import Blocker
 import magellan.core.catalog as cg
-import magellan.utils.metadata_utils as utils
+# import magellan.utils.metadata as utils
 import magellan.utils.helperfunctions as helper
 
 class AttrEquivalenceBlocker(Blocker):

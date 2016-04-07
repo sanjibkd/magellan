@@ -15,27 +15,21 @@ def read_csv_metadata(file_path, **kwargs):
     expected to be  with the same file name but with .metadata
     extension.
 
-    Parameters
-    ----------
-    file_path : str
-        csv file path
-    kwargs : dict
-        key value arguments
+    Args:
+    file_path (str): csv file path
 
-    Returns
-    -------
-    result : pandas DataFrame
+    kwargs (dict): key value arguments to pandas read_csv
 
-    Examples
-    --------
+    Returns:
+        result (pandas dataframe)
+
+    Examples:
     >>> import magellan as mg
     >>> A = mg.read_csv_metadata('A.csv')
     # if A.metadata_ is present along with A.csv, the metadata information
     # will be updated for A
     >>> A.get_key()
-
     """
-
     # update metadata from file (if present)
     if is_metadata_file_present(file_path):
         file_name, file_ext = os.path.splitext(file_path)
