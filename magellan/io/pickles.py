@@ -4,27 +4,21 @@ import pickle
 
 from collections import OrderedDict
 from magellan import Catalog
-from magellan.io.parsers import is_metadata_file_present
+from magellan.io.parsers import _is_metadata_file_present
 
 
 def save_object(obj, file_path):
     """
-      Save magellan objects
+    Save Magellan objects
 
-      Parameters
-      ----------
-      obj : Python objects.
-        It can be magellan objects such as rule-based blocker, feature table, rule-based matcher,
-          match trigger
+    Args:
+        obj (python object): This can be magellan objects such as blockers, matchers, triggers, etc.
+        file_path (str): File path to store objects
 
-      file_path : str
-        File path to store object
-
-      Returns
-      -------
-      status : bool
-        returns True if the command executes successfully.
+    Returns:
+        status (bool). Returns True if the command executes successfully
     """
+
     with open(file_path, 'w') as f:
         cloud.serialization.cloudpickle.dump(obj, f)
     return True
@@ -32,17 +26,14 @@ def save_object(obj, file_path):
 
 def load_object(file_path):
     """
-    Load magellan objects
+    Load Magellan objects
 
-    Parameters
-    ----------
-    file_path : str
-        file path to load object from
-    Returns
-    -------
-    result : Python object
-        typically magellan objects such as rule-based blocker, feature table, rule-based matcher,
-        match_trigger
+    Args:
+        file_path (str): File path to load object from
+
+    Returns:
+        result (python object). Typically magellan objects such as blockers, matchers, triggers, etc
+
     """
     with open(file_path, 'r') as f:
         result = pickle.load(f)
@@ -51,19 +42,15 @@ def load_object(file_path):
 
 def save_table_metadata(df, file_path):
     """
-    Pickle data frame along with metadata
+    Pickle dataframe along with the metadata
 
-    Parameters
-    ----------
-    df : pandas DataFrame
+    Args:
+        df (pandas dataframe): Dataframe that should be saved
+        file_path (str): File path where the dataframe must be stored
 
-    file_path : str
-        file path where the data frame must be stored
+    Returns:
+        status (bool). Returns True if the command executes successfully
 
-    Returns
-    -------
-    status : bool
-        returns True if the command executes successfully.
     """
 
     file_name, file_ext = os.path.splitext(file_path)
@@ -94,24 +81,20 @@ def save_table_metadata(df, file_path):
 
 def load_table_metadata(file_path):
     """
-    load table from file
+    Load table from file
+    Args:
+        file_path (str): File path to load the file from
 
-    Parameters
-    ----------
-    file_path : str
-        File path to load file from
-
-    Returns
-    -------
-    loaded_dataframe : pandas DataFrame
-         returns the data frame loaded from file
+    Returns:
+        Loaded dataframe (pandas dataframe). Returns the dataframe loaded from the file.
 
     """
+
     # load data frame from file path
     df = pickle.load(file_path)
 
     # load metadata from file path
-    if is_metadata_file_present(file_path):
+    if _is_metadata_file_present(file_path):
         file_name, file_ext = os.path.splitext(file_path)
         metadata_filename = file_name + '.metadata'
         catalog = Catalog.Instance()

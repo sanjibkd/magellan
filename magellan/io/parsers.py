@@ -16,9 +16,8 @@ def read_csv_metadata(file_path, **kwargs):
     extension.
 
     Args:
-    file_path (str): csv file path
-
-    kwargs (dict): key value arguments to pandas read_csv
+        file_path (str): csv file path
+        kwargs (dict): key value arguments to pandas read_csv
 
     Returns:
         result (pandas dataframe)
@@ -30,17 +29,18 @@ def read_csv_metadata(file_path, **kwargs):
     # will be updated for A
     >>> A.get_key()
     """
+
     # update metadata from file (if present)
-    if is_metadata_file_present(file_path):
+    if _is_metadata_file_present(file_path):
         file_name, file_ext = os.path.splitext(file_path)
         file_name += '.metadata'
-        metadata, num_lines = get_metadata_from_file(file_name)
+        metadata, num_lines = _get_metadata_from_file(file_name)
     else:
         metadata = {}
 
     # update metadata from kwargs
-    metadata, kwargs = update_metadata_for_read_cmd(metadata, **kwargs)
-    check_metadata_for_read_cmd(metadata)
+    metadata, kwargs = _update_metadata_for_read_cmd(metadata, **kwargs)
+    _check_metadata_for_read_cmd(metadata)
     df = pd.read_csv(file_path, **kwargs)
     key = metadata.pop('key', None)
     if key is not None:
@@ -54,28 +54,19 @@ def to_csv_metadata(df, file_path, **kwargs):
     """
     Write csv file along with metadata
 
-    Parameters
-    ----------
-    df : pandas DataFrame
-        Data frame to written to disk
-    file_path : str
-        File path where df contents to be written.
-        Metadata is written with the same file name
-        with .metadata extension
+    Args:
+        df (pandas dataframe): Data frame to written to disk
+        file_path (str):  File path where df contents to be written. Metadata is written with the same file name
+            with .metadata extension
+        kwargs (dict): Key value arguments
 
-    kwargs : dict
-        Key value arguments
+    Returns:
+        status (bool). Returns True if the file was written successfully
 
-    Returns
-    -------
-    status : bool
-        Returns True if the file was written successfully
-
-    Examples
-    --------
-    >>> import magellan as mg
-    >>> A = mg.read_csv_metadata('A.csv')
-    >>> mg.to_csv_metadata(A, 'updated.csv')
+    Examples:
+        >>> import magellan as mg
+        >>> A = mg.read_csv_metadata('A.csv')
+        >>> mg.to_csv_metadata(A, 'updated.csv')
 
     """
 
@@ -87,22 +78,25 @@ def to_csv_metadata(df, file_path, **kwargs):
     metadata_filename = file_name + '.metadata'
 
     # write metadata
-    write_metadata(df, metadata_filename)
+    _write_metadata(df, metadata_filename)
 
     # write dataftame
-    df.to_csv(file_path, **kwargs)
+    return df.to_csv(file_path, **kwargs)
 
 
-def write_metadata(df, file_path):
+def _write_metadata(df, file_path):
     """
     Write metadata to disk
 
-    Parameters
-    ----------
-    df : pandas DataFrame
+    Args:
+        df (pandas dataframe): Input dataframe to be written to disk
+        file_path (str): File path where the metadata should be written
 
-    file_path : str
-        File path where the metadata should be written
+    Returns:
+        status (bool). Returns True if the file was written successfully or if no
+            metadata was there to write
+    Notes:
+        This is an internal function
 
     """
     metadata_dict = OrderedDict()
@@ -123,14 +117,43 @@ def write_metadata(df, file_path):
             for k, v in d.iteritems():
                 f.write('#%s=%s\n' % (k, v))
 
+    return True
 
-def is_metadata_file_present(file_path):
+
+def _is_metadata_file_present(file_path):
+    """
+    Check if the metadata file is present
+
+    Args:
+        file_path (str): Metadata file path. Typically path to csv file is given as input.
+
+    Returns:
+        status (bool). Returns True if the metadata is present in the specified path
+
+    Notes:
+        This is an internal function
+
+    """
     file_name, file_ext = os.path.splitext(file_path)
     file_name += '.metadata'
     return os.path.isfile(file_name)
 
 
-def get_metadata_from_file(file_path):
+def _get_metadata_from_file(file_path):
+    """
+    Get the metadata information from the file
+
+    Args:
+        file_path (str): Metadata file path
+
+    Returns:
+        metadata information (dict), and number of lines (int) read from the file
+
+    Notes:
+        This is an internal function
+
+    """
+
     metadata = dict()
     # get the number of lines from the file
     num_lines = sum(1 for line in open(file_path))
@@ -150,7 +173,22 @@ def get_metadata_from_file(file_path):
     return metadata, num_lines
 
 
-def update_metadata_for_read_cmd(metadata, **kwargs):
+def _update_metadata_for_read_cmd(metadata, **kwargs):
+    """
+    Update metadata for read command
+
+    Args:
+        metadata (dict): Dictionary updated from metadata file
+        **kwargs (dict): Dictionary that should be updated with metadata
+
+    Returns:
+        Updated **kwargs(dict), and metadata (dict)
+
+    Notes:
+        This is an internal function
+
+    """
+
     # first update from the key-value arguments
     for k in metadata.keys():
         if kwargs.has_key(k):
@@ -174,7 +212,24 @@ def update_metadata_for_read_cmd(metadata, **kwargs):
     return metadata, kwargs
 
 
-def check_metadata_for_read_cmd(metadata):
+def _check_metadata_for_read_cmd(metadata):
+    """
+    Check the metadata for read command
+
+    Args:
+        metadata (dict): Dictionary with metadata information
+
+    Returns:
+        status (bool). Returns True if all the metadata is present
+
+    Raises:
+        AssertionError: Raised in three cases: (1) If all the metadata required is not present, (2) The ltable is
+            not of type pandas dataframe, and (3) The rtable id not of type pandas dataframe
+
+    Notes:
+        This is an internal function
+
+    """
     table_props = ['ltable', 'rtable', 'fk_ltable', 'fk_rtable']
     v = set(table_props)
     k = set(metadata.keys())
@@ -185,9 +240,9 @@ def check_metadata_for_read_cmd(metadata):
                                  'fk_rtable parameters set')
 
         if isinstance(metadata['ltable'], pd.DataFrame) is False:
-            raise AssertionError('The parameter ltable must be set to valid DataFrame')
+            raise AssertionError('The parameter ltable must be set to valid Dataframe')
 
         if isinstance(metadata['rtable'], pd.DataFrame) is False:
-            raise AssertionError('The parameter rtable must be set to valid MTable')
+            raise AssertionError('The parameter rtable must be set to valid Dataframe')
 
     return True
