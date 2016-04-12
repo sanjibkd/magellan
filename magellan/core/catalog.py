@@ -46,6 +46,9 @@ class Singleton:
 
 @Singleton
 class Catalog(object):
+    """
+    Class to store and retrieve catalog information
+    """
 
     def __init__(self):
         self.properties_catalog = {}
@@ -110,18 +113,17 @@ def get_property(df, name):
     """
     Get property for a dataframe
 
-    Parameters
-    ----------
-    df : pandas DataFrame
-        Data frame object
+    Args:
+        df (pandas dataframe): Dataframe for which the property should be retrieved
+        name (str): Name of the property that should be retrieved
 
-    name : str
-        Property name
+    Returns:
+        Property value (pandas object) for the given property name
 
-    Returns
-    -------
-    result : object
-        Property value for the given name
+    Raises:
+        AttributeError: If the input dataframe in null
+        KeyError: If the dataframe is not present in the catalog, or the requested property is not
+            present in the catalog
 
     """
 
@@ -140,6 +142,17 @@ def get_property(df, name):
 
 
 def set_property(df, name, value):
+    """
+    Set property for a dataframe
+
+    Args:
+        df:
+        name:
+        value:
+
+    Returns:
+
+    """
     catalog = Catalog.Instance()
 
     if df is None:
