@@ -146,11 +146,15 @@ def set_property(df, name, value):
     Set property for a dataframe
 
     Args:
-        df:
-        name:
-        value:
+        df (pandas dataframe): Dataframe for which the property has to be set
+        name (str): Property name
+        value (pandas object): Property value
 
     Returns:
+        status (bool). Returns True if the property was set successfully
+
+    Raises:
+        AttributeError: If the input dataframe is null
 
     """
     catalog = Catalog.Instance()
@@ -165,6 +169,20 @@ def set_property(df, name, value):
 
 
 def get_all_properties(df):
+    """
+    Get all the properties for a dataframe
+
+    Args:
+        df (pandas dataframe): Dataframe for which the properties must be retrieved
+
+    Returns:
+        Property dictionary (dict). The keys are property names (str) and the values are property values (pandas object)
+
+    Raises:
+        AttributeError: If the input dataframe is null
+        KeyError: If the information about the input dataframe is not present in the catalog
+
+    """
     catalog = Catalog.Instance()
 
     if df is None:
@@ -177,6 +195,21 @@ def get_all_properties(df):
 
 
 def del_property(df, name):
+    """
+    Delete a property from the catalog
+
+    Args:
+        df (pandas dataframe): Input dataframe for which a property must be deleted
+        name (str): Property name
+
+    Returns:
+        status (bool). Returns True if the deletion was successful
+
+    Raises:
+        AttributeError: If the input dataframe is null
+        KeyError: If the Dataframe info. is not present or the given property is not present for that dataframe in the
+            catalog
+    """
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
@@ -191,6 +224,19 @@ def del_property(df, name):
 
 
 def del_all_properties(df):
+    """
+    Delete all properties for a dataframe
+
+    Args:
+        df (pandas dataframe): Input dataframe for which all the properties must be deleted.
+
+    Returns:
+        status (bool). Returns True if the deletion was successful
+
+    Raises:
+        AttributeError: If the input dataframe is null
+        KeyError: If the dataframe information is not present in the catalog
+    """
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
@@ -202,21 +248,55 @@ def del_all_properties(df):
 
 
 def get_catalog():
+    """
+    Get Catalog information.
+
+
+    Returns:
+        Catalog information in a dictionary format.
+
+    """
     catalog = Catalog.Instance()
     return catalog.get_catalog()
 
 
 def del_catalog():
+    """
+    Delete catalog information
+
+    Returns:
+        status (bool). Returns True if the deletion was successful.
+    """
     catalog = Catalog.Instance()
     return catalog.del_catalog()
 
 
 def is_catalog_empty():
+    """
+    Check if the catalog is empty
+
+    Returns:
+        result (bool). Returns True if the catalog is empty, else returns False.
+
+    """
     catalog = Catalog.Instance()
     return catalog.is_catalog_empty()
 
 
 def is_dfinfo_present(df):
+    """
+    Check if the dataframe information is present in the catalog
+
+    Args:
+        df (pandas dataframe): Input dataframe
+
+    Returns:
+        result (bool). Returns True if the dataframe information is present in the catalog, else returns False
+
+    Raises:
+        AttributeError: If the input dataframe is null
+
+    """
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
@@ -225,6 +305,16 @@ def is_dfinfo_present(df):
 
 
 def is_property_present_for_df(df, name):
+    """
+    Check if the property is present is
+
+    Args:
+        df:
+        name:
+
+    Returns:
+
+    """
     catalog = Catalog.Instance()
     if df is None:
         raise AttributeError('Input Dataframe cannot be null')
