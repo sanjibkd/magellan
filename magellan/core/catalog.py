@@ -306,13 +306,14 @@ def is_dfinfo_present(df):
 
 def is_property_present_for_df(df, name):
     """
-    Check if the property is present is
+    Check if the property is present is for a dataframe
 
     Args:
-        df:
-        name:
+        df (pandas dataframe): Input pandas dataframe
+        name (str): Property name
 
     Returns:
+        result (bool). Returns True if the property is present for the dataframe
 
     """
     catalog = Catalog.Instance()
