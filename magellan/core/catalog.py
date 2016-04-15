@@ -306,14 +306,18 @@ def is_dfinfo_present(df):
 
 def is_property_present_for_df(df, name):
     """
-    Check if the property is present is for a dataframe
+    Check if the property is present for the dataframe
 
     Args:
-        df (pandas dataframe): Input pandas dataframe
+        df (pandas dataframe): Input dataframe
         name (str): Property name
 
     Returns:
-        result (bool). Returns True if the property is present for the dataframe
+        result (bool). Returns True if the property is present for the input dataframe
+
+    Raises:
+        AttributeError: If the input dataframe is null
+        KeyError: If the dataframe is not present in the catalog
 
     """
     catalog = Catalog.Instance()
@@ -327,11 +331,34 @@ def is_property_present_for_df(df, name):
 
 
 def get_catalog_len():
+    """
+    Get the number of entries in the catalog
+
+    Returns:
+        length (int) of the catalog
+
+    """
     catalog = Catalog.Instance()
     return catalog.get_catalog_len()
 
 
 def set_properties(df, prop_dict, replace=True):
+    """
+    Set properties for a dataframe in the catalog
+    Args:
+        df (pandas dataframe): Input dataframe
+        prop_dict (dict): Property dictionary with keys as property names and values as python objects
+        replace (bool): Flag to indicate whether the input properties can replace the properties in the catalog
+
+    Returns:
+        status (bool). Returns True if the setting of properties was successful
+
+    Note:
+        The function is intended to set all the properties in the catalog with the given property dictionary.
+          The replace flag is just a check where the properties will be not be disturbed if they exist already in the
+          catalog
+
+    """
     catalog = Catalog.Instance()
     if catalog.is_dfinfo_present(df):
         if replace is False:
