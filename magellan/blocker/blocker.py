@@ -35,7 +35,9 @@ class Blocker(object):
             assert status == True, error_str + ' key attribute ' + metadata['key'] + ' does not qualify to be a key'
         return metadata
 
-    def process_candset_metadata(self, candset, key, fk_ltable, ltable, fk_rtable, rtable):
+    def process_candset_metadata(self, candset, key, fk_ltable, ltable, fk_rtable, rtable,
+                                 check_key=True, check_ltable_fk_constraint=True, check_rtable_fk_constraint=True):
+
         # get the required metadata from catalog
         # update the metadata
         # check metadata
@@ -59,16 +61,21 @@ class Blocker(object):
         # check metadata
 
         # key
-        key_status = cg.is_key_attribute(candset, metadata['key'])
-        assert key_status == True, 'The key attribute ' + metadata['key'] + ' does not qualify to be a key'
+        if check_key:
+            key_status = cg.is_key_attribute(candset, metadata['key'])
+            assert key_status == True, 'The key attribute ' + metadata['key'] + ' does not qualify to be a key'
 
         # fk
-        l_meta = self.process_table_metadata(metadata['ltable'], None, 'ltable', False)
-        r_meta = self.process_table_metadata(metadata['rtable'], None, 'rtable', False)
-        fk_status = cg.check_fk_constraint(candset, metadata['fk_ltable'], metadata['ltable'], l_meta['key'])
-        assert fk_status == True, 'Attribute ' + metadata['fk_ltable'] + ' does not satisfy foreign key constraint'
-        fk_status = cg.check_fk_constraint(candset, metadata['fk_rtable'], metadata['rtable'], r_meta['key'])
-        assert fk_status == True, 'Attribute ' + metadata['fk_rtable'] + ' does not satisfy foreign key constraint'
+        if check_ltable_fk_constraint:
+            l_meta = self.process_table_metadata(metadata['ltable'], None, 'ltable', False)
+            fk_status = cg.check_fk_constraint(candset, metadata['fk_ltable'], metadata['ltable'], l_meta['key'])
+            assert fk_status == True, 'Attribute ' + metadata['fk_ltable'] + ' does not satisfy foreign key constraint'
+
+        if check_rtable_fk_constraint:
+            r_meta = self.process_table_metadata(metadata['rtable'], None, 'rtable', False)
+            fk_status = cg.check_fk_constraint(candset, metadata['fk_rtable'], metadata['rtable'], r_meta['key'])
+            assert fk_status == True, 'Attribute ' + metadata['fk_rtable'] + ' does not satisfy foreign key constraint'
+
         return metadata
 
     def check_attrs_present(self, table, attrs):
