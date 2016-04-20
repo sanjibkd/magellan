@@ -353,7 +353,7 @@ def set_properties(df, prop_dict, replace=True):
     Returns:
         status (bool). Returns True if the setting of properties was successful
 
-    Note:
+    Notes:
         The function is intended to set all the properties in the catalog with the given property dictionary.
           The replace flag is just a check where the properties will be not be disturbed if they exist already in the
           catalog
@@ -372,6 +372,21 @@ def set_properties(df, prop_dict, replace=True):
 
 
 def copy_properties(src, tar, replace=True):
+    """
+    Copy properties from one dataframe to another
+    Args:
+        src (pandas dataframe): Dataframe from which the properties to be copied from
+        tar (pandas dataframe): Dataframe to which the properties to be copied
+        replace (bool): Flag to indicate whether the source properties can replace the tart properties
+
+    Returns:
+        status (bool). Returns True if the copying was successful
+
+    Notes:
+        This function internally calls set_properties and get_all_properties
+
+
+    """
     # copy catalog information from src to tar
     catalog = Catalog.Instance()
     metadata = catalog.get_all_properties(src)
@@ -379,10 +394,31 @@ def copy_properties(src, tar, replace=True):
 
 # key related methods
 def get_key(df):
+    """
+    Get the key attribute for a dataframe
+
+    Args:
+        df (pandas dataframe): Dataframe for which the key must be retrieved
+
+    Returns:
+        key (str)
+
+    """
     return get_property(df, 'key')
 
 
 def set_key(df, key):
+    """
+    Set the key attribute for a dataframe
+
+    Args:
+        df (pandas dataframe): Dataframe for which the key must be set
+        key (str): Key attribute in the dataframe
+
+    Returns:
+        status (bool). Returns True if the key attribute was set successfully, else returns False
+
+    """
     if is_key_attribute(df, key) is False:
         logger.warning('Attribute ('+key+') does not qualify to be a key')
         return False
@@ -391,6 +427,21 @@ def set_key(df, key):
 
 
 def get_reqd_metadata_from_catalog(df, reqd_metadata):
+    """
+    Get a list of properties from the catalog
+
+    Args:
+        df (pandas dataframe): Dataframe for the properties must be retrieved
+        reqd_metadata (list): List of properties to be retrieved
+
+    Returns:
+        properties (dict)
+
+    Notes:
+        This is an internal helper function.
+
+
+    """
     if not isinstance(reqd_metadata, list):
         reqd_metadata = [reqd_metadata]
 
@@ -403,6 +454,22 @@ def get_reqd_metadata_from_catalog(df, reqd_metadata):
 
 
 def update_reqd_metadata_with_kwargs(metadata, kwargs_dict, reqd_metadata):
+    """
+    Update the metadata with input args
+
+    Args:
+        metadata (dict): Properties dictonary
+        kwargs_dict (dict): Input key-value args
+        reqd_metadata (list): List of properties to be updated.
+
+    Returns:
+        updated properties (dict)
+
+    Notes:
+        This is an internal helper function.
+
+
+    """
     if not isinstance(reqd_metadata, list):
         reqd_metadata = [reqd_metadata]
 
@@ -413,6 +480,19 @@ def update_reqd_metadata_with_kwargs(metadata, kwargs_dict, reqd_metadata):
 
 
 def get_diff_with_reqd_metadata(metadata, reqd_metadata):
+    """
+    Find what metadata is missing from the required list
+
+    Args:
+        metadata (dict): Property dictionary
+        reqd_metadata (list): List of properties
+
+    Returns:
+        diff list (list) of properties between the property dictionary and the properties list
+
+    Notes:
+        This is an internal helper function
+    """
     k = metadata.keys()
     if not isinstance(reqd_metadata, list):
         reqd_metadata = [reqd_metadata]
@@ -421,6 +501,20 @@ def get_diff_with_reqd_metadata(metadata, reqd_metadata):
 
 
 def is_all_reqd_metadata_present(metadata, reqd_metadata):
+    """
+    Check if all the required metadata are present
+
+    Args:
+        metadata (dict): Property dictionary
+        reqd_metadata (list): List of properties
+
+    Returns:
+        result (bool). Returns True if all the required metadata is present, else returns False
+
+    Notes:
+        This is an internal helper function
+
+    """
     d = get_diff_with_reqd_metadata(metadata, reqd_metadata)
     if len(d) == 0:
         return True
@@ -428,46 +522,115 @@ def is_all_reqd_metadata_present(metadata, reqd_metadata):
         return False
 
 
-def check_fk_constraint(df, fk, df_base, key):
-    t = df_base[df_base[key].isin(pd.unique(df[fk]))]
-    return is_key_attribute(t, key)
+def check_fk_constraint(df_foreign, attr_foreign, df_base, attr_base):
+    """
+    Check if the foreign key is a primary key
+
+    Args:
+        df_foreign (pandas dataframe): Foreign dataframe
+        attr_foreign (str): Attribute in the foreign dataframe
+        df_base (pandas dataframe): Base dataframe
+        attr_base (str): Attribute in the base dataframe
+
+    Returns:
+        result (bool). Returns True if the foreign key contraint is satisfied, else returns False
+
+    Notes:
+        This is an internal helper function
+
+    """
+    t = df_base[df_base[attr_base].isin(pd.unique(df_foreign[attr_foreign]))]
+    return is_key_attribute(t, attr_base)
 
 
 def does_contain_rows(df):
+    """
+    Check if the dataframe is non-empty
+
+    Args:
+        df (pandas dataframe): Input dataframe
+
+    Returns:
+        result (bool). Returns True, if the length of the dataframe is greater than 0, else returns False
+
+    Notes:
+        This is an internal helper function
+
+    """
     return len(df) > 0
 
 
-def is_attr_unique(df, key):
-    uniq_flag = len(np.unique(df[key])) == len(df)
+def is_attr_unique(df, attr):
+    """
+    Check if the attribute is unique in a dataframe
+
+    Args:
+        df (pandas dataframe): Input dataframe
+        attr (str): Attribute in the pandas dataframe
+
+    Returns:
+        result (bool). Returns True, if the attribute contains unique values, else returns False
+
+    Notes:
+        This is an internal helper function
+
+    """
+    uniq_flag = len(np.unique(df[attr])) == len(df)
     if not uniq_flag:
         return False
     else:
         return True
 
 
-def does_contain_missing_vals(df, key):
-    nan_flag = sum(df[key].isnull()) == 0
+def does_contain_missing_vals(df, attr):
+    """
+    Check if the attribute contains missing values in the dataframe
+
+    Args:
+        df (pandas dataframe): Input dataframe
+        attr (str): Attribute in the pandas dataframe
+
+    Returns:
+        result (bool). Returns True, if the attribute contains missing values, else returns False
+
+    Notes:
+        This is an internal helper function
+
+    """
+    nan_flag = sum(df[attr].isnull()) == 0
     if not nan_flag:
         return False
     else:
         return True
 
 
-def is_key_attribute(df, key, verbose=False):
+def is_key_attribute(df, attr, verbose=False):
+    """
+    Check if an attribute is a key attribute
+    Args:
+        df (pandas dataframe): Input dataframe
+        attr (str): Attribute in the pandas dataframe
+        verbose (bool):  Flag to indicate whether warnings should be printed out
+
+    Returns:
+        result (bool). Returns True, if the attribute is a key attribute (unique and without missing values), else
+         returns False
+
+    """
     # check if the length is > 0
     if len(df) > 0:
         # check for uniqueness
-        uniq_flag = len(np.unique(df[key])) == len(df)
+        uniq_flag = len(np.unique(df[attr])) == len(df)
         if not uniq_flag:
             if verbose:
-                logger.warning('Attribute ' + key + ' does not contain unique values')
+                logger.warning('Attribute ' + attr + ' does not contain unique values')
             return False
 
         # check if there are missing or null values
-        nan_flag = sum(df[key].isnull()) == 0
+        nan_flag = sum(df[attr].isnull()) == 0
         if not nan_flag:
             if verbose:
-                logger.warning('Attribute ' + key + ' contains missing values')
+                logger.warning('Attribute ' + attr + ' contains missing values')
             return False
         return uniq_flag and nan_flag
     else:
