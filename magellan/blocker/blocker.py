@@ -6,20 +6,22 @@ import magellan.core.catalog as cg
 class Blocker(object):
     pass
 
-
     # remove nows with nan values at block_attr
-    def rem_nan(self, table, block_attr):
+
+    @staticmethod
+    def rem_nan(table, block_attr):
         l = table.index.values[np.where(table[block_attr].notnull())[0]]
         return table.ix[l]
 
     # process metadata for pandas dataframe
-    def process_table_metadata(self, table, key, error_str='table', check_key=True):
+    @staticmethod
+    def process_table_metadata(table, key, error_str='table', check_key=True, verbose=False):
 
         # get required metadata from catalog
         # update the metadata
         # check metadata
         # return a dict with metadata if everything is fine
-        reqd_metadata=['key']
+        reqd_metadata = ['key']
         metadata = cg.get_reqd_metadata_from_catalog(table, reqd_metadata)
         if key is not None:
             metadata['key'] = key
@@ -31,8 +33,8 @@ class Blocker(object):
 
         # check key
         if check_key:
-            status = cg.is_key_attribute(table, metadata['key'])
-            assert status == True, error_str + ' key attribute ' + metadata['key'] + ' does not qualify to be a key'
+            status = cg.is_key_attribute(table, metadata['key'], verbose)
+            assert status == True, error_str + ' key attribute ' + str(metadata['key']) + ' does not qualify to be a key'
         return metadata
 
     def process_candset_metadata(self, candset, key, fk_ltable, ltable, fk_rtable, rtable,
@@ -78,24 +80,18 @@ class Blocker(object):
 
         return metadata
 
-    def check_attrs_present(self, table, attrs):
+    @staticmethod
+    def check_attrs_present(table, attrs):
         if isinstance(attrs, list) is False:
             attrs = [attrs]
         status = helper.are_all_attributes_present(table, attrs, verbose=True)
         return status
 
-    def process_output_attrs(self, table, attrs, error_str=""):
+    @staticmethod
+    def process_output_attrs(table, attrs, error_str=""):
         if attrs:
             if not isinstance(attrs, list):
                 attrs = [attrs]
-            assert set(attrs).issubset(table.columns) is True, 'Output attributes are not in ' + error_str + ' table'
+            assert set(attrs).issubset(table.columns) == True, 'Output attributes are not in ' + error_str + ' table'
             attrs = [x for x in attrs if x not in [cg.get_key(table)]]
         return attrs
-
-
-
-
-
-
-
-
