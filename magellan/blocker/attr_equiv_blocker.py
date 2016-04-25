@@ -10,74 +10,83 @@ import magellan.utils.helperfunctions as helper
 
 
 class AttrEquivalenceBlocker(Blocker):
-    def block_tables(self, ltable, rtable, l_block_attr, r_block_attr,
-                     l_id_attr=None, r_id_attr=None,
-                     l_output_attrs=None, r_output_attrs=None,
-                     l_output_prefix='ltable_', r_output_prefix='rtable_',
-                     update_catalog=False):
+    # def block_tables(self, ltable, rtable, l_block_attr, r_block_attr,
+    #                  l_id_attr=None, r_id_attr=None,
+    #                  l_output_attrs=None, r_output_attrs=None,
+    #                  l_output_prefix='ltable_', r_output_prefix='rtable_',
+    #                  update_catalog=False):
+    #
+    #     # process the metadata information.
+    #     l_metadata = self.process_table_metadata(ltable, l_id_attr, 'ltable', True, True)
+    #     r_metadata = self.process_table_metadata(rtable, r_id_attr, 'rtable', True)
+    #
+    #     # @todo print the metadata that is getting used
+    #     status = self.check_attrs_present(ltable, l_block_attr)
+    #     assert status is True, 'Left block attribute is not present in the left table'
+    #
+    #     status = self.check_attrs_present(rtable, r_block_attr)
+    #     assert status is True, 'Right block attribute is not present in the right table'
+    #
+    #     # process the output attributes
+    #     l_output_attrs = self.process_output_attrs(ltable, l_metadata['key'], l_output_attrs, 'left')
+    #     r_output_attrs = self.process_output_attrs(rtable, r_metadata['key'], r_output_attrs, 'right')
+    #
+    #
+    #
+    #
+    #     # rem nans @todo this should be modified based on missing data handling policy
+    #     l_df = self.rem_nan(ltable, l_block_attr)
+    #     r_df = self.rem_nan(rtable, r_block_attr)
+    #
+    #     # do the blocking
+    #     candset = pd.merge(l_df, r_df, left_on=l_block_attr, right_on=r_block_attr,
+    #                        suffixes=('_ltable', '_rtable'))
+    #
+    #     # get output columns
+    #     retain_cols, final_cols = self.output_columns(l_metadata['key'], r_metadata['key'],
+    #                                                   list(candset.columns),
+    #                                                   l_output_attrs, r_output_attrs,
+    #                                                   l_output_prefix, r_output_prefix)
+    #
+    #     # project and rename columns
+    #     candset = candset[retain_cols]
+    #     candset.columns = final_cols
+    #     key = helper.get_name_for_key(candset.columns)
+    #     candset = helper.add_key_column(candset, key)
+    #
+    #     # set properties
+    #     cg.set_key(candset, key)
+    #     cg.set_property(candset, 'ltable', ltable)
+    #     cg.set_property(candset, 'rtable', rtable)
+    #     cg.set_property(candset, 'fk_ltable', l_output_prefix + l_metadata['key'])
+    #     cg.set_property(candset, 'fk_rtable', r_output_prefix + r_metadata['key'])
+    #
+    #     # update catalog
+    #     if update_catalog:
+    #         if l_id_attr is not None:
+    #             cg.set_key(ltable, l_id_attr)
+    #         if r_id_attr is not None:
+    #             cg.set_key(rtable, r_id_attr)
+    #
+    #     return candset
 
-        # process the metadata information.
-        l_metadata = self.process_table_metadata(ltable, l_id_attr, 'ltable', True, True)
-        r_metadata = self.process_table_metadata(rtable, r_id_attr, 'rtable', True)
-
-        # @todo print the metadata that is getting used
-        status = self.check_attrs_present(ltable, l_block_attr)
-        assert status is True, 'Left block attribute is not present in the left table'
-
-        status = self.check_attrs_present(rtable, r_block_attr)
-        assert status is True, 'Right block attribute is not present in the right table'
-
-        # process the output attributes
-        l_output_attrs = self.process_output_attrs(ltable, l_output_attrs, 'left')
-        r_output_attrs = self.process_output_attrs(rtable, r_output_attrs, 'right')
 
 
 
-
-        # rem nans @todo this should be modified based on missing data handling policy
-        l_df = self.rem_nan(ltable, l_block_attr)
-        r_df = self.rem_nan(rtable, r_block_attr)
-
-        # do the blocking
-        candset = pd.merge(l_df, r_df, left_on=l_block_attr, right_on=r_block_attr,
-                           suffixes=('_ltable', '_rtable'))
-
-        # get output columns
-        retain_cols, final_cols = self.output_columns(cg.get_key(ltable),
-                                                      cg.get_key(rtable), list(candset.columns),
-                                                      l_output_attrs, r_output_attrs,
-                                                      l_output_prefix, r_output_prefix)
-
-        # project and rename columns
-        candset = candset[retain_cols]
-        candset.columns = final_cols
-        key = helper.get_name_for_key(candset.columns)
-        candset = helper.add_key_column(candset, key)
-
-        # set properties
-        cg.set_key(candset, key)
-        cg.set_property(candset, 'ltable', ltable)
-        cg.set_property(candset, 'rtable', rtable)
-        cg.set_property(candset, 'fk_ltable', l_output_prefix + l_metadata['key'])
-        cg.set_property(candset, 'fk_rtable', r_output_prefix + r_metadata['key'])
-
-        # update catalog
-        if update_catalog:
-            if l_id_attr is not None:
-                cg.set_key(l_id_attr)
-            if r_id_attr is not None:
-                cg.set_key(r_id_attr)
-
-        return candset
 
     def block_candset(self, candset, l_block_attr, r_block_attr,
-                      id_attr=None,
+                      key_attr=None,
                       l_fk_attr=None, r_fk_attr=None,
                       ltable=None, rtable=None,
-                      l_id_attr=None, r_id_attr=None):
+                      l_key_attr=None, r_key_attr=None,
+                      show_progress=True):
 
         # get metadata
-        metadata = self.process_candset_metadata(candset, id_attr, l_fk_attr, ltable, r_fk_attr, rtable)
+        metadata = self.process_candset_metadata(candset, key_attr,
+                                                 l_fk_attr, r_fk_attr,
+                                                 ltable, rtable,
+                                                 l_key_attr, r_key_attr
+                                                 )
 
         l_fk_attr, ltable = metadata['fk_ltable'], metadata['ltable']
         r_fk_attr, rtable = metadata['fk_rtable'], metadata['rtable']
@@ -95,7 +104,8 @@ class AttrEquivalenceBlocker(Blocker):
         l_df.set_index(l_key, inplace=True)
         r_df.set_index(r_key, inplace=True)
 
-        bar = pyprind.ProgBar(len(candset))
+        if show_progress:
+            bar = pyprind.ProgBar(len(candset))
 
         # create look up table for quick access of rows
         l_dict = {}
@@ -111,7 +121,8 @@ class AttrEquivalenceBlocker(Blocker):
         rid_idx = column_names.index(r_fk_attr)
 
         for row in candset.itertuples(index=False):
-            bar.update()
+            if show_progress:
+               bar.update()
             l_row = l_dict[row[lid_idx]]
             r_row = r_dict[row[rid_idx]]
             l_val = l_row[l_block_attr]

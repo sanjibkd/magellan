@@ -426,12 +426,39 @@ def set_key(df, key):
         return set_property(df, 'key', key)
 
 
+def set_fk_ltable(df, fk_ltable):
+    """
+    Set foreign key attribute to the left table
+    Args:
+        df (pandas dataframe): Dataframe for which the foreign key must be set
+        fk_ltable (str): Foreign key attribute in the dataframe
+
+    Returns:
+        status (bool). Returns True if the ltable foreign key attribute was set successfully, else returns False
+    """
+    return set_property(df, 'fk_ltable', fk_ltable)
+
+
+def set_fk_rtable(df, fk_rtable):
+    """
+    Set foreign key attribute to the right table
+    Args:
+        df (pandas dataframe): Dataframe for which the foreign key must be set
+        fk_rtable (str): Foreign key attribute in the dataframe
+
+    Returns:
+        status (bool). Returns True if the rtable foreign key attribute was set successfully, else returns False
+    """
+    return set_property(df, 'fk_rtable', fk_rtable)
+
+
+
 def get_reqd_metadata_from_catalog(df, reqd_metadata):
     """
     Get a list of properties from the catalog
 
     Args:
-        df (pandas dataframe): Dataframe for the properties must be retrieved
+        df (pandas dataframe): Dataframe for which the properties must be retrieved
         reqd_metadata (list): List of properties to be retrieved
 
     Returns:
