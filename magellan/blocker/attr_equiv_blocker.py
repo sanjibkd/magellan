@@ -13,7 +13,8 @@ class AttrEquivalenceBlocker(Blocker):
     def block_tables(self, ltable, rtable, l_block_attr, r_block_attr,
                      l_id_attr=None, r_id_attr=None,
                      l_output_attrs=None, r_output_attrs=None,
-                     l_output_prefix='ltable.', r_output_prefix='rtable.'):
+                     l_output_prefix='ltable_', r_output_prefix='rtable_',
+                     update_catalog=False):
 
         # process the metadata information.
         l_metadata = self.process_table_metadata(ltable, l_id_attr, 'ltable', True, True)
@@ -29,6 +30,9 @@ class AttrEquivalenceBlocker(Blocker):
         # process the output attributes
         l_output_attrs = self.process_output_attrs(ltable, l_output_attrs, 'left')
         r_output_attrs = self.process_output_attrs(rtable, r_output_attrs, 'right')
+
+
+
 
         # rem nans @todo this should be modified based on missing data handling policy
         l_df = self.rem_nan(ltable, l_block_attr)
@@ -57,16 +61,26 @@ class AttrEquivalenceBlocker(Blocker):
         cg.set_property(candset, 'fk_ltable', l_output_prefix + l_metadata['key'])
         cg.set_property(candset, 'fk_rtable', r_output_prefix + r_metadata['key'])
 
+        # update catalog
+        if update_catalog:
+            if l_id_attr is not None:
+                cg.set_key(l_id_attr)
+            if r_id_attr is not None:
+                cg.set_key(r_id_attr)
+
         return candset
 
     def block_candset(self, candset, l_block_attr, r_block_attr,
-                      key=None, fk_ltable=None, ltable=None, fk_rtable=None, rtable=None):
+                      id_attr=None,
+                      l_fk_attr=None, r_fk_attr=None,
+                      ltable=None, rtable=None,
+                      l_id_attr=None, r_id_attr=None):
 
         # get metadata
-        metadata = self.process_candset_metadata(candset, key, fk_ltable, ltable, fk_rtable, rtable)
+        metadata = self.process_candset_metadata(candset, id_attr, l_fk_attr, ltable, r_fk_attr, rtable)
 
-        fk_ltable, ltable = metadata['fk_ltable'], metadata['ltable']
-        fk_rtable, rtable = metadata['fk_rtable'], metadata['rtable']
+        l_fk_attr, ltable = metadata['fk_ltable'], metadata['ltable']
+        r_fk_attr, rtable = metadata['fk_rtable'], metadata['rtable']
         l_key, r_key = cg.get_key(ltable), cg.get_key(rtable)
 
         status = self.check_attrs_present(ltable, l_block_attr)
@@ -93,8 +107,8 @@ class AttrEquivalenceBlocker(Blocker):
 
         valid = []
         column_names = list(candset.columns)
-        lid_idx = column_names.index(fk_ltable)
-        rid_idx = column_names.index(fk_rtable)
+        lid_idx = column_names.index(l_fk_attr)
+        rid_idx = column_names.index(r_fk_attr)
 
         for row in candset.itertuples(index=False):
             bar.update()
@@ -119,8 +133,10 @@ class AttrEquivalenceBlocker(Blocker):
 
         cg.set_property(out_table, 'ltable', ltable)
         cg.set_property(out_table, 'rtable', rtable)
-        cg.set_property(out_table, 'fk_ltable', fk_ltable)
-        cg.set_property(out_table, 'fk_rtable', fk_rtable)
+        cg.set_property(out_table, 'fk_ltable', l_fk_attr)
+        cg.set_property(out_table, 'fk_rtable', r_fk_attr)
+
+
         return out_table
 
     def block_tuples(self, ltuple, rtuple, l_block_attr, r_block_attr):
