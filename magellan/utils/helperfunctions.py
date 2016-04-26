@@ -39,3 +39,22 @@ def get_name_for_key(columns):
             k = '_id' + str(i)
         i += 1
     return k
+
+def log_info(lgr, s, verbose):
+    if verbose:
+        lgr.info(s)
+
+def get_prop_from_dict(d, name):
+    return d[name]
+
+
+
+def check_attrs_present(table, attrs):
+    if isinstance(attrs, list) is False:
+        attrs = [attrs]
+    status = are_all_attributes_present(table, attrs, verbose=True)
+    return status
+
+
+
+

@@ -3,6 +3,8 @@ import logging
 import numpy as np
 import pandas as pd
 
+import magellan.utils.helperfunctions as helper
+
 # import magellan.utils.metadata
 
 
@@ -53,39 +55,58 @@ class Catalog(object):
     def __init__(self):
         self.properties_catalog = {}
 
+    def init_properties_for_id(self, obj_id):
+        self.properties_catalog[obj_id] = {}
+        return True
+
+
     def init_properties(self, df):
         df_id = id(df)
-        self.properties_catalog[df_id] = {}
-        return True
+        self.init_properties(df_id)
+
+    def get_property_for_id(self, obj_id, name):
+        d = self.properties_catalog[obj_id]
+        return d[name]
 
     def get_property(self, df, name):
         df_id = id(df)
-        d = self.properties_catalog[df_id]
-        return d[name]
+        return self.get_property_for_id(df_id, name)
+
+    def set_property_for_id(self, obj_id, name, value):
+        d = self.properties_catalog[obj_id]
+        d[name] = value
+        self.properties_catalog[obj_id] = d
+        return True
 
     def set_property(self, df, name, value):
         df_id = id(df)
-        d = self.properties_catalog[df_id]
-        d[name] = value
-        self.properties_catalog[df_id] = d
-        return True
+        return self.set_property_for_id(df_id, name, value)
+
+    def get_all_properties_for_id(self, obj_id):
+        d = self.properties_catalog[obj_id]
+        return d
 
     def get_all_properties(self, df):
         df_id = id(df)
-        d = self.properties_catalog[df_id]
-        return d
+        return self.get_all_properties_for_id(df_id)
+
+    def del_property_for_id(self, obj_id, name):
+        d = self.properties_catalog[obj_id]
+        del d[name]
+        self.properties_catalog[obj_id] = d
+        return True
 
     def del_property(self, df, name):
         df_id = id(df)
-        d = self.properties_catalog[df_id]
-        del d[name]
-        self.properties_catalog[df_id] = d
+        return self.del_property_for_id(df_id, name)
+
+    def del_all_properties_for_id(self, obj_id):
+        del self.properties_catalog[obj_id]
         return True
 
     def del_all_properties(self, df):
         df_id = id(df)
-        del self.properties_catalog[df_id]
-        return True
+        return self.del_all_properties_for_id(df_id)
 
     def get_catalog(self):
         return self.properties_catalog
@@ -103,10 +124,14 @@ class Catalog(object):
     def is_dfinfo_present(self, df):
         return id(df) in self.properties_catalog
 
-    def is_metadata_present_for_df(self, df, name):
-        df_id = id(df)
-        d = self.properties_catalog[df_id]
+    def is_property_present_for_id(self, obj_id, name):
+        d = self.properties_catalog[obj_id]
         return name in d
+
+    def is_property_present_for_df(self, df, name):
+        df_id = id(df)
+        return self.is_property_present_for_id(df_id, name)
+
 
 
 def get_property(df, name):
@@ -135,7 +160,7 @@ def get_property(df, name):
     if not catalog.is_dfinfo_present(df):
         raise KeyError('Dataframe information is not present in the catalog')
 
-    if not catalog.is_metadata_present_for_df(df, name):
+    if not catalog.is_property_present_for_df(df, name):
         raise KeyError('Requested metadata (' + name + ') for the given dataframe is not present in the catalog')
 
     return catalog.get_property(df, name)
@@ -217,7 +242,7 @@ def del_property(df, name):
     if not catalog.is_dfinfo_present(df):
         raise KeyError('Dataframe information is not present in the catalog')
 
-    if not catalog.is_metadata_present_for_df(df, name):
+    if not catalog.is_property_present_for_df(df, name):
         raise KeyError('Requested metadata (' + name + ') for the given dataframe is not present in the catalog')
 
     return catalog.del_property(df, name)
@@ -327,7 +352,7 @@ def is_property_present_for_df(df, name):
     if catalog.is_dfinfo_present(df) is False:
         raise KeyError('Dataframe information is not present in the catalog')
 
-    return catalog.is_metadata_present_for_df(df, name)
+    return catalog.is_property_present_for_df(df, name)
 
 
 def get_catalog_len():
@@ -424,6 +449,13 @@ def set_key(df, key):
         return False
     else:
         return set_property(df, 'key', key)
+
+
+def get_fk_ltable(df):
+    return get_property(df, 'fk_ltable')
+
+def get_fk_rtable(df):
+    return get_property(df, 'fk_rtable')
 
 
 def set_fk_ltable(df, fk_ltable):
@@ -552,20 +584,20 @@ def is_all_reqd_metadata_present(metadata, reqd_metadata):
 def check_fk_constraint(df_foreign, attr_foreign, df_base, attr_base):
     """
     Check if the foreign key is a primary key
-
     Args:
         df_foreign (pandas dataframe): Foreign dataframe
         attr_foreign (str): Attribute in the foreign dataframe
         df_base (pandas dataframe): Base dataframe
         attr_base (str): Attribute in the base dataframe
-
     Returns:
         result (bool). Returns True if the foreign key contraint is satisfied, else returns False
-
     Notes:
         This is an internal helper function
-
     """
+    if isinstance(attr_base, basestring) is False:
+        return False
+    if  helper.check_attrs_present(df_base, attr_base) is False:
+        return False
     t = df_base[df_base[attr_base].isin(pd.unique(df_foreign[attr_foreign]))]
     return is_key_attribute(t, attr_base)
 
@@ -662,5 +694,48 @@ def is_key_attribute(df, attr, verbose=False):
         return uniq_flag and nan_flag
     else:
         return True
+
+
+def show_properties(df):
+    if is_dfinfo_present(df) == False:
+        logger.warning('Dataframe information is not present in the catalog')
+        return False
+    metadata = get_all_properties(df)
+    for prop in metadata.iterkeys():
+        value = metadata[prop]
+        if isinstance(value, basestring):
+            print prop + ": " + value
+        else:
+            print prop + "(obj.id): " + id(value)
+
+    return True
+
+
+def set_candset_properties(candset, key, fk_ltable, fk_rtable, ltable, rtable):
+    set_property(candset, 'key', key)
+    set_fk_ltable(candset, fk_ltable)
+    set_fk_rtable(candset, fk_rtable)
+    set_property(candset, 'ltable', ltable)
+    set_property(candset, 'rtable', rtable)
+
+
+def validate_metadata_for_table(table, key, out_str, lgr, verbose):
+    helper.log_info(lgr, 'Validating ' + out_str + ' key: ' + str(key), verbose)
+    assert isinstance(key, basestring) is True, 'Key attribute must be a string.'
+    assert helper.check_attrs_present(table, key) is True, 'Key attribute is not present in the ' + out_str + ' table'
+    assert is_key_attribute(table, key, verbose) is True, 'Attribute ' + str(key) + ' in the ' + out_str + ' table ' \
+                                                                                    'does not qualify to be the key'
+
+
+def validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key,
+                                  lgr, verbose):
+    validate_metadata_for_table(candset, key, 'cand.set', lgr, verbose)
+
+    assert check_fk_constraint(candset, fk_ltable, ltable, l_key) is True, 'Cand.set does not satisfy foreign key ' \
+                                                                           'constraint with the left table'
+    assert check_fk_constraint(candset, fk_rtable, rtable, r_key) is True, 'Cand.set does not satisfy foreign key ' \
+                                                                           'constraint with the right table'
+
+    return True
 
 
