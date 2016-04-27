@@ -37,3 +37,8 @@ print path_for_A
 # print mg.get_catalog_len()
 
 
+A = mg.read_csv_metadata(path_for_A)
+print A
+print mg._catalog
+mg.set_key(A, 'ID')
+print 'xyx'

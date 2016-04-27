@@ -1,4 +1,5 @@
 import logging
+import logging.config
 
 import numpy as np
 import pandas as pd
@@ -7,8 +8,9 @@ import magellan.utils.helperfunctions as helper
 
 # import magellan.utils.metadata
 
-
+logging.config.fileConfig(helper.get_install_path()+'/configs/logging.ini')
 logger = logging.getLogger(__name__)
+
 
 
 class Singleton:
@@ -59,10 +61,9 @@ class Catalog(object):
         self.properties_catalog[obj_id] = {}
         return True
 
-
     def init_properties(self, df):
         df_id = id(df)
-        self.init_properties(df_id)
+        self.init_properties_for_id(df_id)
 
     def get_property_for_id(self, obj_id, name):
         d = self.properties_catalog[obj_id]
@@ -133,7 +134,6 @@ class Catalog(object):
         return self.is_property_present_for_id(df_id, name)
 
 
-
 def get_property(df, name):
     """
     Get property for a dataframe
@@ -191,6 +191,13 @@ def set_property(df, name, value):
         catalog.init_properties(df)
 
     catalog.set_property(df, name, value)
+
+
+def get_all_properties_for_id(obj_id):
+    catalog = Catalog.Instance()
+    if obj_id not in catalog.get_catalog():
+        raise KeyError('Object not in the catalog')
+    return catalog.get_all_properties_for_id(obj_id)
 
 
 def get_all_properties(df):
@@ -387,7 +394,7 @@ def set_properties(df, prop_dict, replace=True):
     catalog = Catalog.Instance()
     if catalog.is_dfinfo_present(df):
         if replace is False:
-            logger.warning('Properties already exists for df (' +id(df) +' ). Not replacing it')
+            logger.warning('Properties already exists for df (' + id(df) + ' ). Not replacing it')
             return False
 
     catalog.del_all_properties(df)
@@ -417,6 +424,7 @@ def copy_properties(src, tar, replace=True):
     metadata = catalog.get_all_properties(src)
     return set_properties(tar, metadata, replace)
 
+
 # key related methods
 def get_key(df):
     """
@@ -445,7 +453,7 @@ def set_key(df, key):
 
     """
     if is_key_attribute(df, key) is False:
-        logger.warning('Attribute ('+key+') does not qualify to be a key')
+        logger.warning('Attribute (' + key + ') does not qualify to be a key')
         return False
     else:
         return set_property(df, 'key', key)
@@ -453,6 +461,7 @@ def set_key(df, key):
 
 def get_fk_ltable(df):
     return get_property(df, 'fk_ltable')
+
 
 def get_fk_rtable(df):
     return get_property(df, 'fk_rtable')
@@ -482,7 +491,6 @@ def set_fk_rtable(df, fk_rtable):
         status (bool). Returns True if the rtable foreign key attribute was set successfully, else returns False
     """
     return set_property(df, 'fk_rtable', fk_rtable)
-
 
 
 def get_reqd_metadata_from_catalog(df, reqd_metadata):
@@ -596,7 +604,7 @@ def check_fk_constraint(df_foreign, attr_foreign, df_base, attr_base):
     """
     if isinstance(attr_base, basestring) is False:
         return False
-    if  helper.check_attrs_present(df_base, attr_base) is False:
+    if helper.check_attrs_present(df_base, attr_base) is False:
         return False
     t = df_base[df_base[attr_base].isin(pd.unique(df_foreign[attr_foreign]))]
     return is_key_attribute(t, attr_base)
@@ -699,16 +707,26 @@ def is_key_attribute(df, attr, verbose=False):
 def show_properties(df):
     if is_dfinfo_present(df) == False:
         logger.warning('Dataframe information is not present in the catalog')
-        return False
+        return
     metadata = get_all_properties(df)
+    print 'id: ' + str(id(df))
     for prop in metadata.iterkeys():
         value = metadata[prop]
         if isinstance(value, basestring):
             print prop + ": " + value
         else:
-            print prop + "(obj.id): " + id(value)
+            print prop + "(obj.id): " + str(id(value))
 
-    return True
+
+def show_properties_for_id(obj_id):
+    metadata = get_all_properties_for_id(obj_id)
+    print 'id: ' + str(obj_id)
+    for prop in metadata.iterkeys():
+        value = metadata[prop]
+        if isinstance(value, basestring):
+            print prop + ": " + value
+        else:
+            print prop + "(obj.id): " + str(id(value))
 
 
 def set_candset_properties(candset, key, fk_ltable, fk_rtable, ltable, rtable):
@@ -723,19 +741,17 @@ def validate_metadata_for_table(table, key, out_str, lgr, verbose):
     helper.log_info(lgr, 'Validating ' + out_str + ' key: ' + str(key), verbose)
     assert isinstance(key, basestring) is True, 'Key attribute must be a string.'
     assert helper.check_attrs_present(table, key) is True, 'Key attribute is not present in the ' + out_str + ' table'
-    assert is_key_attribute(table, key, verbose) is True, 'Attribute ' + str(key) + ' in the ' + out_str + ' table ' \
-                                                                                    'does not qualify to be the key'
+    assert is_key_attribute(table, key, verbose) == True, 'Attribute ' + str(key) + ' in the ' + out_str + ' table ' \
+                                                                                                           'does not qualify to be the key'
 
 
 def validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key,
                                   lgr, verbose):
     validate_metadata_for_table(candset, key, 'cand.set', lgr, verbose)
 
-    assert check_fk_constraint(candset, fk_ltable, ltable, l_key) is True, 'Cand.set does not satisfy foreign key ' \
+    assert check_fk_constraint(candset, fk_ltable, ltable, l_key) == True, 'Cand.set does not satisfy foreign key ' \
                                                                            'constraint with the left table'
-    assert check_fk_constraint(candset, fk_rtable, rtable, r_key) is True, 'Cand.set does not satisfy foreign key ' \
+    assert check_fk_constraint(candset, fk_rtable, rtable, r_key) == True, 'Cand.set does not satisfy foreign key ' \
                                                                            'constraint with the right table'
 
     return True
-
-

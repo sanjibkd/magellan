@@ -1,14 +1,19 @@
 import logging
+import logging.config
 import pandas as pd
 import pyprind
 import numpy as np
 
 import magellan.utils.helperfunctions
+
 from magellan.blocker.blocker import Blocker
 import magellan.core.catalog as cg
 # import magellan.utils.metadata as utils
 import magellan.utils.helperfunctions as helper
 
+
+logging.config.fileConfig(helper.get_install_path()+'/configs/logging.ini')
+# logging.config.fileConfig('/Users/pradap/Documents/Research/Python-Package/magellan/logging.ini')
 logger = logging.getLogger(__name__)
 
 
@@ -28,8 +33,8 @@ class AttrEquivalenceBlocker(Blocker):
         helper.log_info(logger, 'Required metadata: ltable key, rtable key', verbose)
 
         helper.log_info(logger, 'Getting metadata from the catalog', verbose)
-        l_key = cg.get_key(ltable, 'key')
-        r_key = cg.get_key(rtable, 'key')
+        l_key = cg.get_key(ltable)
+        r_key = cg.get_key(rtable)
 
         cg.validate_metadata_for_table(ltable, l_key, 'left', logger, verbose)
         cg.validate_metadata_for_table(rtable, r_key, 'right', logger, verbose)
@@ -44,9 +49,11 @@ class AttrEquivalenceBlocker(Blocker):
 
         # construct output table
         retain_cols, final_cols = self.output_columns(l_key, r_key, list(candset.columns),
-                                                      l_output_attrs, r_output_attrs)
+                                                      l_output_attrs, r_output_attrs,
+                                                      l_output_prefix, r_output_prefix)
 
         candset = candset[retain_cols]
+        candset.columns = final_cols
 
         # Update catalog for the candidate set
         key = helper.get_name_for_key(candset.columns)
@@ -89,16 +96,16 @@ class AttrEquivalenceBlocker(Blocker):
         valid = []
 
         # #set index for convenience
-        l_df = ltable.set_index(l_key, inplace=False)
-        r_df = rtable.set_index(r_key, inplace=False)
+        l_df = ltable.set_index(l_key, inplace=False, drop=False)
+        r_df = rtable.set_index(r_key, inplace=False, drop=False)
 
         for idx, row in candset.iterrows(): # think about converting this to itertuples
             if show_progress:
                 bar.update()
 
             # #get the value of block attributes
-            l_val = l_df.ix[row[l_key], l_block_attr]
-            r_val = r_df.ix[row[r_key], r_block_attr]
+            l_val = l_df.ix[row[fk_ltable], l_block_attr]
+            r_val = r_df.ix[row[fk_rtable], r_block_attr]
 
             if l_val != np.NaN and r_val != np.NaN:
                 if l_val == r_val:
@@ -114,7 +121,7 @@ class AttrEquivalenceBlocker(Blocker):
         else:
             out_table = pd.DataFrame(columns=candset.columns)
 
-        cg.set_candset_properties(out_table, key, fk_ltable, fk_ltable, ltable, rtable)
+        cg.set_candset_properties(out_table, key, fk_ltable, fk_rtable, ltable, rtable)
 
         # return the output table
         return out_table
