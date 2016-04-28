@@ -35,6 +35,7 @@ class AttrEquivalenceBlocker(Blocker):
         helper.log_info(logger, 'Getting metadata from the catalog', verbose)
         l_key = cg.get_key(ltable)
         r_key = cg.get_key(rtable)
+        helper.log_info(logger, '..... Done', verbose)
 
         cg.validate_metadata_for_table(ltable, l_key, 'left', logger, verbose)
         cg.validate_metadata_for_table(rtable, r_key, 'right', logger, verbose)
@@ -78,6 +79,7 @@ class AttrEquivalenceBlocker(Blocker):
         rtable = cg.get_property(candset, 'rtable')
         l_key = cg.get_key(ltable)
         r_key = cg.get_key(rtable)
+        helper.log_info(logger, '..... Done', verbose)
 
         # validate metadata
         cg.validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key,
@@ -96,10 +98,10 @@ class AttrEquivalenceBlocker(Blocker):
         valid = []
 
         # #set index for convenience
-        l_df = ltable.set_index(l_key, inplace=False, drop=False)
-        r_df = rtable.set_index(r_key, inplace=False, drop=False)
+        l_df = ltable.set_index(l_key, drop=False)
+        r_df = rtable.set_index(r_key, drop=False)
 
-        for idx, row in candset.iterrows(): # think about converting this to itertuples
+        for idx, row in candset.iterrows(): # think about converting this to itertuples, and using a lookup table.
             if show_progress:
                 bar.update()
 
@@ -121,6 +123,7 @@ class AttrEquivalenceBlocker(Blocker):
         else:
             out_table = pd.DataFrame(columns=candset.columns)
 
+        # update the catalog
         cg.set_candset_properties(out_table, key, fk_ltable, fk_rtable, ltable, rtable)
 
         # return the output table

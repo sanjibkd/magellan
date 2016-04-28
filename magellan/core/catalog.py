@@ -743,15 +743,20 @@ def validate_metadata_for_table(table, key, out_str, lgr, verbose):
     assert helper.check_attrs_present(table, key) is True, 'Key attribute is not present in the ' + out_str + ' table'
     assert is_key_attribute(table, key, verbose) == True, 'Attribute ' + str(key) + ' in the ' + out_str + ' table ' \
                                                                                                            'does not qualify to be the key'
+    helper.log_info(lgr, '..... Done', verbose)
 
 
 def validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key,
                                   lgr, verbose):
     validate_metadata_for_table(candset, key, 'cand.set', lgr, verbose)
 
+    helper.log_info(lgr, 'Validating foreign key constraint for left table', verbose)
     assert check_fk_constraint(candset, fk_ltable, ltable, l_key) == True, 'Cand.set does not satisfy foreign key ' \
                                                                            'constraint with the left table'
+    helper.log_info(lgr, '..... Done', verbose)
+    helper.log_info(lgr, 'Validating foreign key constraint for right table', verbose)
     assert check_fk_constraint(candset, fk_rtable, rtable, r_key) == True, 'Cand.set does not satisfy foreign key ' \
                                                                            'constraint with the right table'
+    helper.log_info(lgr, '..... Done', verbose)
 
     return True
