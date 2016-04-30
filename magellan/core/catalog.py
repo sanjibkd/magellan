@@ -760,3 +760,23 @@ def validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rt
     helper.log_info(lgr, '..... Done', verbose)
 
     return True
+
+def get_keys_for_ltable_rtable(ltable, rtable, lgr, verbose):
+    helper.log_info(lgr, 'Required metadata: ltable key, rtable key', verbose)
+    helper.log_info(lgr, 'Getting metadata from the catalog', verbose)
+    l_key = get_key(ltable)
+    r_key = get_key(rtable)
+    helper.log_info(lgr, '..... Done', verbose)
+    return l_key, r_key
+
+def get_metadata_for_candset(candset, lgr, verbose):
+    helper.log_info(lgr, 'Getting metadata from the catalog', verbose)
+    key = get_key(candset)
+    fk_ltable = get_fk_ltable(candset)
+    fk_rtable = get_fk_rtable(candset)
+    ltable = get_property(candset, 'ltable')
+    rtable = get_property(candset, 'rtable')
+    l_key = get_key(ltable)
+    r_key = get_key(rtable)
+    helper.log_info(lgr, '..... Done', verbose)
+    return key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key

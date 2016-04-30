@@ -29,14 +29,12 @@ class AttrEquivalenceBlocker(Blocker):
         # ----------------------------------- metadata related stuff----------------------------------------------
 
         # required metadata: keys for the input tables.
-
         helper.log_info(logger, 'Required metadata: ltable key, rtable key', verbose)
 
-        helper.log_info(logger, 'Getting metadata from the catalog', verbose)
-        l_key = cg.get_key(ltable)
-        r_key = cg.get_key(rtable)
-        helper.log_info(logger, '..... Done', verbose)
+        # get metadata
+        l_key, r_key = cg.get_keys_for_ltable_rtable(ltable, rtable, logger, verbose)
 
+        # validate metadata
         cg.validate_metadata_for_table(ltable, l_key, 'left', logger, verbose)
         cg.validate_metadata_for_table(rtable, r_key, 'right', logger, verbose)
 
@@ -69,17 +67,8 @@ class AttrEquivalenceBlocker(Blocker):
         # required metadata: key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key
         helper.log_info(logger, 'Required metadata: cand.set key, fk ltable, fk rtable, '
                                 'ltable, rtable, ltable key, rtable key', verbose)
-
         # get metadata
-        helper.log_info(logger, 'Getting metadata from the catalog', verbose)
-        key = cg.get_key(candset)
-        fk_ltable = cg.get_fk_ltable(candset)
-        fk_rtable = cg.get_fk_rtable(candset)
-        ltable = cg.get_property(candset, 'ltable')
-        rtable = cg.get_property(candset, 'rtable')
-        l_key = cg.get_key(ltable)
-        r_key = cg.get_key(rtable)
-        helper.log_info(logger, '..... Done', verbose)
+        key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key = cg.get_metadata_for_candset(candset, logger, verbose)
 
         # validate metadata
         cg.validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key,
@@ -128,6 +117,7 @@ class AttrEquivalenceBlocker(Blocker):
 
         # return the output table
         return out_table
+
 
     def block_tuples(self, ltuple, rtuple, l_block_attr, r_block_attr):
         return ltuple[l_block_attr] != rtuple[r_block_attr]

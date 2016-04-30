@@ -37,3 +37,10 @@ class Blocker(object):
                 r_output_attrs = [r_output_attrs]
             assert set(r_output_attrs).issubset(rtable.columns) is True, 'Right output attribtutes are not ' \
                                                                          'in the right table'
+    def get_attrs_to_retain(self, l_key, r_key, l_output_attrs, r_output_attrs, l_output_prefix, r_output_prefix):
+        ret_cols = [l_output_prefix + l_key, r_output_prefix + r_key]
+        if l_output_attrs:
+            ret_cols.extend([l_output_prefix]+c for c in l_output_attrs)
+        if r_output_attrs:
+            ret_cols.extend([r_output_prefix]+c for c in r_output_attrs)
+        return ret_cols

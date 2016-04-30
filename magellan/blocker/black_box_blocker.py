@@ -38,13 +38,10 @@ class BlackBoxBlocker(Blocker):
         # metadata related stuff..
 
         # required metadata: keys for the input tables
-
         helper.log_info(logger, 'Required metadata: ltable key, rtable key', verbose)
 
-        helper.log_info(logger, 'Getting metadata from the catalog', verbose)
-        l_key = cg.get_key(ltable)
-        r_key = cg.get_key(rtable)
-        helper.log_info(logger, '..... Done', verbose)
+        # get metadata
+        l_key, r_key = cg.get_keys_for_ltable_rtable(ltable, rtable, logger, verbose)
 
         # validate metadata.
         cg.validate_metadata_for_table(ltable, l_key, 'left', logger, verbose)
@@ -142,15 +139,7 @@ class BlackBoxBlocker(Blocker):
                                 'ltable, rtable, ltable key, rtable key', verbose)
 
         # get metadata
-        helper.log_info(logger, 'Getting metadata from the catalog', verbose)
-        key = cg.get_key(candset)
-        fk_ltable = cg.get_fk_ltable(candset)
-        fk_rtable = cg.get_fk_rtable(candset)
-        ltable = cg.get_property(candset, 'ltable')
-        rtable = cg.get_property(candset, 'rtable')
-        l_key = cg.get_key(ltable)
-        r_key = cg.get_key(rtable)
-        helper.log_info(logger, '..... Done', verbose)
+        key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key = cg.get_metadata_for_candset(candset, logger, verbose)
 
 
         # validate metadata
@@ -217,10 +206,3 @@ class BlackBoxBlocker(Blocker):
 
 
     # utility functions.
-    def get_attrs_to_retain(self, l_key, r_key, l_output_attrs, r_output_attrs, l_output_prefix, r_output_prefix):
-        ret_cols = [l_output_prefix + l_key, r_output_prefix + r_key]
-        if l_output_attrs:
-            ret_cols.extend([l_output_prefix]+c for c in l_output_attrs)
-        if r_output_attrs:
-            ret_cols.extend([r_output_prefix]+c for c in r_output_attrs)
-        return ret_cols
