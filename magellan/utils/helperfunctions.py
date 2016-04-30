@@ -56,5 +56,14 @@ def check_attrs_present(table, attrs):
     return status
 
 
+# remove non-ascii characters from string
+def remove_non_ascii(s):
+    s = ''.join(i for i in s if ord(i) < 128)
+    s = str(s)
+    return str.strip(s)
 
+# find the list difference
+def diff(a, b):
+  b = set(b)
+  return [aa for aa in a if aa not in b]
 
