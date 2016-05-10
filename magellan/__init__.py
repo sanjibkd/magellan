@@ -22,11 +22,9 @@ from magellan.io.pickles import load_object, load_table, save_object, save_table
 # from magellan.blocker.attr_equiv_blocker import AttrEquivalenceBlocker
 #
 #
-#
-# logger
 
 
 #
 #
 # # helper functions
-# from magellan.utils.helperfunctions import get_install_path
+from magellan.utils.generic_helper import get_install_path, load_dataset

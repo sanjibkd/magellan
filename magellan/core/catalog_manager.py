@@ -324,10 +324,11 @@ def set_key(df, key):
 
     """
     if ch.is_key_attribute(df, key) is False:
-        logger.warning('Attribute (' + key + ') does not qualify to be a key')
+        logger.warning('Attribute (' + key + ') does not qualify to be a key; Not setting/replacing the key')
         return False
     else:
         return set_property(df, 'key', key)
+
 
 def get_fk_ltable(df):
     return get_property(df, 'fk_ltable')
@@ -523,6 +524,7 @@ def get_keys_for_ltable_rtable(ltable, rtable, lgr, verbose):
     ch.log_info(lgr, '..... Done', verbose)
     return l_key, r_key
 
+
 def get_metadata_for_candset(candset, lgr, verbose):
     ch.log_info(lgr, 'Getting metadata from the catalog', verbose)
     key = get_key(candset)
@@ -534,3 +536,5 @@ def get_metadata_for_candset(candset, lgr, verbose):
     r_key = get_key(rtable)
     ch.log_info(lgr, '..... Done', verbose)
     return key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key
+
+
