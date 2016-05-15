@@ -19,7 +19,8 @@ from magellan.io.pickles import load_object, load_table, save_object, save_table
 #
 #
 # # blockers
-# from magellan.blocker.attr_equiv_blocker import AttrEquivalenceBlocker
+from magellan.blocker.attr_equiv_blocker import AttrEquivalenceBlocker
+from magellan.blocker.black_box_blocker import BlackBoxBlocker
 #
 #
 

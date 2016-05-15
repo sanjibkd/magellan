@@ -3,13 +3,15 @@ import logging
 
 import pandas as pd
 import numpy as np
+import pyprind
 
 from magellan.blocker.blocker import Blocker
 import magellan.core.catalog_manager as cm
-from magellan.utils.catalog_helper import log_info
+from magellan.utils.catalog_helper import log_info, get_name_for_key, add_key_column
 from magellan.utils.generic_helper import rem_nan
 
 logger = logging.getLogger(__name__)
+
 
 class AttrEquivalenceBlocker(Blocker):
     def block_tables(self, ltable, rtable, l_block_attr, r_block_attr, l_output_attrs=None, r_output_attrs=None,
@@ -46,11 +48,83 @@ class AttrEquivalenceBlocker(Blocker):
         candset.columns = final_cols
 
         # update catalog
+        key = get_name_for_key(candset.columns)
+        candset = add_key_column(candset, key)
+        cm.set_candset_properties(candset, key, l_output_prefix+l_key, r_output_prefix+r_key, ltable, rtable)
+
+        # return candidate set
+        return candset
+
+
+
+    def block_candset(self, candset, l_block_attr, r_block_attr, verbose=True, show_progress=True):
+
+        # get and validate metadata
+        log_info(logger, 'Required metadata: cand.set key, fk ltable, fk rtable, '
+                                'ltable, rtable, ltable key, rtable key', verbose)
+
+        # # get metadata
+        key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key = cm.get_metadata_for_candset(candset, logger, verbose)
+
+        # # validate metadata
+        cm.validate_metadata_for_candset(candset, key, fk_ltable, fk_rtable, ltable, rtable, l_key, r_key,
+                                         logger, verbose)
+
+        # validate input parameters
+        self.validate_block_attrs(ltable, rtable, l_block_attr, r_block_attr)
+
+        # do blocking
+
+        # # initialize progress bar
+        if show_progress:
+            bar = pyprind.ProgBar(len(candset))
+
+        # # initialize list to keep track of valid ids
+        valid = []
+
+        # # set index for convenience
+        l_df = ltable.set_index(l_key, drop=False)
+        r_df = rtable.set_index(r_key, drop=False)
+
+        # # iterate the rows in candset
+        # # @todo replace iterrows with itertuples
+        for idx, row in candset.iterrows():
+
+            # # update the progress bar
+            if show_progress:
+                bar.update()
+
+            # # get the value of block attributes
+            l_val = l_df.ix[row[fk_ltable], l_block_attr]
+            r_val = r_df.ix[row[fk_rtable], r_block_attr]
+
+            if l_val != np.NaN and r_val != np.NaN:
+                if l_val == r_val:
+                    valid.append(True)
+                else:
+                    valid.append(False)
+            else:
+                valid.append(False)
+
+        # construct output table
+        if len(candset) > 0:
+            out_table = candset[valid]
+        else:
+            out_table = pd.DataFrame(columns=candset.columns)
+
+        # update the catalog
+        cm.set_candset_properties(out_table, key, fk_ltable, fk_rtable, ltable, rtable)
+
+        # return the output table
+        return out_table
+
+
+    def block_tuples(self, ltuple, rtuple, l_block_attr, r_block_attr):
+        return ltuple[l_block_attr] != rtuple[r_block_attr]
 
 
 
 
-        pass
 
 
 
@@ -63,14 +137,7 @@ class AttrEquivalenceBlocker(Blocker):
 
 
 
-
-
-
-
-
-
-
-       # -----------------------------------------------------
+    # -----------------------------------------------------
     # utility functions -- this function seems to be specific to attribute equivalence blocking
 
     # validate the blocking attrs

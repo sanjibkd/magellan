@@ -140,3 +140,20 @@ def does_contain_rows(df):
     return len(df) > 0
 
 
+def get_name_for_key(columns):
+    k = '_id'
+    i = 0
+    # try attribute name of the form "_id", "_id0", "_id1", ... and
+    # return the first available name
+    while True:
+        if k not in columns:
+            break
+        else:
+            k = '_id' + str(i)
+        i += 1
+    return k
+
+
+def add_key_column(table, key):
+    table.insert(0, key, range(0, len(table)))
+    return table
