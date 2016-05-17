@@ -7,9 +7,9 @@ import math
 
 import numpy as np
 
-from magellan.external.py_stringmatching import utils
+from magellan.externals.py_stringmatching import utils
 # noinspection PyProtectedMember,PyProtectedMember
-from magellan.external.py_stringmatching.compat import _range
+from magellan.externals.py_stringmatching.compat import _range
 
 
 def sim_ident(s1, s2):

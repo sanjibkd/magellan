@@ -1,7 +1,7 @@
 import cython
 
-from magellan.external.py_stringmatching.compat import _range
-from magellan.external.py_stringmatching import utils
+from magellan.externals.py_stringmatching.compat import _range
+from magellan.externals.py_stringmatching import utils
 
 
 # @todo: add examples in the comments
